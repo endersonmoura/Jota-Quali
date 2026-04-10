@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
-import { User } from "../@types";
-import connection from "../database/connection";
+import { User } from "../../@types";
+import connection from "../../database/connection";
 
 interface CreateUserRecord {
   name: string;
@@ -27,7 +27,7 @@ class UserRepository {
       name: data.name,
       email: data.email,
       passwordHash: data.passwordHash,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     this.users.push(user);

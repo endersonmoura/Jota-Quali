@@ -1,12 +1,16 @@
 import { createHash } from "crypto";
-import { CreateUserDTO, User, UserResponse } from "../@types";
-import AppError from "../errors/AppError";
-import UserRepository from "../repositories/UserRepository";
+import { CreateUserDTO, User, UserResponse } from "../../@types";
+import AppError from "../../errors/AppError";
+import UserRepository from "./UserRepository";
 
 class CreateUserService {
   constructor(private readonly userRepository = new UserRepository()) {}
 
-  public async execute({ name, email, password }: CreateUserDTO): Promise<UserResponse> {
+  public async execute({
+    name,
+    email,
+    password,
+  }: CreateUserDTO): Promise<UserResponse> {
     const safeName = name?.trim();
     const safeEmail = email?.trim().toLowerCase();
     const safePassword = password?.trim();
@@ -15,7 +19,7 @@ class CreateUserService {
       throw new AppError(
         "name, email and password are required",
         400,
-        "VALIDATION_ERROR"
+        "VALIDATION_ERROR",
       );
     }
 
@@ -27,19 +31,23 @@ class CreateUserService {
       throw new AppError(
         "password must have at least 6 characters",
         400,
-        "INVALID_PASSWORD"
+        "INVALID_PASSWORD",
       );
     }
 
     const existingUser = await this.userRepository.findByEmail(safeEmail);
     if (existingUser) {
-      throw new AppError("email already registered", 409, "EMAIL_ALREADY_EXISTS");
+      throw new AppError(
+        "email already registered",
+        409,
+        "EMAIL_ALREADY_EXISTS",
+      );
     }
 
     const user = await this.userRepository.create({
       name: safeName,
       email: safeEmail,
-      passwordHash: this.hashPassword(safePassword)
+      passwordHash: this.hashPassword(safePassword),
     });
 
     return this.toUserResponse(user);
@@ -58,7 +66,7 @@ class CreateUserService {
       id: user.id,
       name: user.name,
       email: user.email,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
     };
   }
 }

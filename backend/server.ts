@@ -2,7 +2,7 @@ import express from "express";
 import env from "./src/configs/env";
 import { errorHandler } from "./src/middlewares/errorHandler";
 import { notFound } from "./src/middlewares/notFound";
-import routes from "./src/routes";
+import routes from "./src/modules/user";
 import logger from "./src/utils/logger";
 
 const app = express();

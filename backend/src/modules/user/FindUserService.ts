@@ -1,6 +1,6 @@
-import { UserResponse } from "../@types";
-import AppError from "../errors/AppError";
-import UserRepository from "../repositories/UserRepository";
+import { UserResponse } from "../../@types";
+import AppError from "../../errors/AppError";
+import UserRepository from "./UserRepository";
 
 class FindUserService {
   constructor(private readonly userRepository = new UserRepository()) {}
@@ -16,7 +16,7 @@ class FindUserService {
       id: user.id,
       name: user.name,
       email: user.email,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
     };
   }
 }
