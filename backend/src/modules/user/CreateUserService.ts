@@ -44,11 +44,25 @@ class CreateUserService {
       );
     }
 
-    const user = await this.userRepository.create({
-      name: safeName,
-      email: safeEmail,
-      passwordHash: this.hashPassword(safePassword),
-    });
+    let user: User;
+
+    try {
+      user = await this.userRepository.create({
+        name: safeName,
+        email: safeEmail,
+        passwordHash: this.hashPassword(safePassword),
+      });
+    } catch (error) {
+      if (this.isUniqueConstraintError(error)) {
+        throw new AppError(
+          "email already registered",
+          409,
+          "EMAIL_ALREADY_EXISTS",
+        );
+      }
+
+      throw error;
+    }
 
     return this.toUserResponse(user);
   }
@@ -59,6 +73,41 @@ class CreateUserService {
 
   private hashPassword(password: string): string {
     return createHash("sha256").update(password).digest("hex");
+  }
+
+  private isUniqueConstraintError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+      return false;
+    }
+
+    const details = error as Error & {
+      code?: string;
+      number?: number;
+      originalError?: { info?: { number?: number } };
+      precedingErrors?: Array<{ number?: number }>;
+    };
+
+    const duplicatedKeyNumbers = [2601, 2627];
+    const codes = new Set([details.code, details.number?.toString()]);
+
+    if (codes.has("EREQUEST")) {
+      const originalNumber = details.originalError?.info?.number;
+      if (originalNumber && duplicatedKeyNumbers.includes(originalNumber)) {
+        return true;
+      }
+
+      if (
+        details.precedingErrors?.some(
+          (item) =>
+            typeof item.number === "number" &&
+            duplicatedKeyNumbers.includes(item.number),
+        )
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private toUserResponse(user: User): UserResponse {
