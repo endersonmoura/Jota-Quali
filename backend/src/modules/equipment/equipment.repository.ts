@@ -1,54 +1,41 @@
-import * as sql from "mssql"; // retirar depois
-import { IEquipment } from "../../@types";
+import type { EntityManager, RequiredEntityData } from "@mikro-orm/mssql" with {
+  "resolution-mode": "import",
+};
+import { DI } from "../../configs/db";
+import { Equipamento } from "../../configs/equipamento.entity";
 
 export class EquipmentRepository {
-  async create(data: IEquipment): Promise<void> {
-    const query = `
-            INSERT INTO Equipamentos (Nome, CodigoPatrimonio, Status, DataAquisicao)
-            VALUES (@nome, @codigoPatrimonio, 'Disponivel', @dataAquisicao)
-        `;
-    const request = new sql.Request();
-    request.input("nome", sql.VarChar, data.Nome);
-    request.input("codigoPatrimonio", sql.VarChar, data.CodigoPatrimonio);
-    request.input("dataAquisicao", sql.Date, data.DataAquisicao);
-
-    await request.query(query);
+  private get em(): EntityManager {
+    return DI.em.fork();
   }
 
-  async findAll(): Promise<IEquipment[]> {
-    const query = `SELECT * FROM Equipamentos`;
-    const result = await new sql.Request().query(query);
-    return result.recordset;
+  public async create(
+    data: RequiredEntityData<Equipamento>,
+  ): Promise<Equipamento> {
+    const equipamento = this.em.create(Equipamento, data);
+    this.em.persist(equipamento);
+    return equipamento;
   }
 
-  async findById(id: string): Promise<IEquipment | null> {
-    const query = `SELECT * FROM Equipamentos WHERE Id = @id`;
-    const request = new sql.Request();
-    request.input("id", sql.UniqueIdentifier, id);
-
-    const result = await request.query(query);
-    return result.recordset[0] || null;
+  public async findAll(): Promise<Equipamento[]> {
+    return this.em.find(Equipamento, { status: { $ne: "Inativo" } });
   }
 
-  async update(id: string, data: Partial<IEquipment>): Promise<void> {
-    const query = `
-            UPDATE Equipamentos 
-            SET Nome = @nome, DataAquisicao = @dataAquisicao
-            WHERE Id = @id
-        `;
-    const request = new sql.Request();
-    request.input("id", sql.UniqueIdentifier, id);
-    request.input("nome", sql.VarChar, data.Nome);
-    request.input("dataAquisicao", sql.Date, data.DataAquisicao);
-
-    await request.query(query);
+  public async findById(id: string): Promise<Equipamento | null> {
+    return this.em.findOne(Equipamento, { id });
   }
 
-  async delete(id: string): Promise<void> {
-    const query = `UPDATE Equipamentos SET Status = 'Inativo' WHERE Id = @id`;
-    const request = new sql.Request();
-    request.input("id", sql.UniqueIdentifier, id);
+  public async update(
+    equipamento: Equipamento,
+    data: Partial<Equipamento>,
+  ): Promise<void> {
+    this.em.assign(equipamento, data);
+  }
 
-    await request.query(query);
+  /**
+   * Confirma transacionalmente todas as persistências agendadas no Unit of Work.
+   */
+  public async flush(): Promise<void> {
+    await this.em.flush();
   }
 }
