@@ -1,3 +1,5 @@
+import { UserResponseDTO } from "../user/user.dto";
+
 export interface CreateUserDTO {
   name: string;
   email: string;
@@ -9,24 +11,14 @@ export interface LoginDTO {
   password: string;
 }
 
-export interface User {
-  id: string;
-  name: string;
+export interface TokenPayload {
+  sub: string;
   email: string;
-  passwordHash: string;
-  createdAt: Date;
-}
-
-export interface UserResponse {
-  id: string;
-  name: string;
-  email: string;
-  createdAt: Date;
 }
 
 export interface LoginResponse {
   token: string;
-  tokenType: "Bearer";
+  tokenType: string;
   expiresIn: number;
-  user: UserResponse;
+  user: UserResponseDTO;
 }
