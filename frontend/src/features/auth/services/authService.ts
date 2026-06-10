@@ -6,7 +6,7 @@ import type {
   RegisterPayload,
 } from "../types";
 
-const SESSION_KEY = "jq.session";
+const SESSION_KEY = "jq.session.v5";
 const RESET_TOKENS_KEY = "jq.resetTokens";
 
 interface MockAccount {
@@ -22,6 +22,7 @@ const ACCOUNTS: MockAccount[] = [
       email: "admin@jotaquali.com",
       role: "admin",
       avatarInitials: "JA",
+      gender: "feminino",
     },
     password: "admin123",
   },
@@ -30,8 +31,9 @@ const ACCOUNTS: MockAccount[] = [
       id: "u-002",
       name: "Rafael Tomaz",
       email: "tecnico@jotaquali.com",
-      role: "tecnico",
+      role: "calibrador",
       avatarInitials: "RT",
+      gender: "masculino",
     },
     password: "tecnico123",
   },
@@ -79,8 +81,9 @@ export const authService = {
       id: `u-${Date.now().toString(36)}`,
       name,
       email,
-      role: "viewer",
+      role: "aguardando_aprovacao",
       avatarInitials: initials,
+      gender: payload.gender,
     };
     ACCOUNTS.push({ user: newUser, password: payload.password });
     const session: AuthSession = {
@@ -128,6 +131,17 @@ export const authService = {
     delete tokens[token];
     storage.set(RESET_TOKENS_KEY, tokens);
     // Mock: não persistimos a nova senha.
+  },
+
+  listUsers(): AuthUser[] {
+    return ACCOUNTS.map((a) => a.user);
+  },
+
+  async updateUserRole(userId: string, newRole: AuthUser["role"]): Promise<void> {
+    await sleep(400);
+    const acc = ACCOUNTS.find((a) => a.user.id === userId);
+    if (!acc) throw new Error("Usuário não encontrado.");
+    acc.user.role = newRole;
   },
 
   listMockAccounts(): { email: string; password: string; name: string }[] {

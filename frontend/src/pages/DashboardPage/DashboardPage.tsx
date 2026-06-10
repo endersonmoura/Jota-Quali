@@ -31,12 +31,13 @@ export default function DashboardPage() {
   useDocumentTitle("Dashboard");
   const { user } = useAuth();
   const firstName = user?.name.split(" ")[0] ?? "";
+  const greeting = user?.gender === "feminino" ? "Bem-vinda" : "Bem-vindo";
 
   return (
     <>
       <PageHeader
         eyebrow="Visão geral"
-        title={`Bem-vindo${firstName ? `, ${firstName}` : ""}`}
+        title={`${greeting}${firstName ? `, ${firstName}` : ""}`}
         subtitle="Acompanhe os indicadores de qualidade e operação da JotaQuali em tempo real."
         actions={
           <>

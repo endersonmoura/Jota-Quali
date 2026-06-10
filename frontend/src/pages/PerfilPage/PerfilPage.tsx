@@ -9,12 +9,20 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import styles from "./PerfilPage.module.css";
 
+const ROLE_LABELS: Record<string, string> = {
+  admin: "Administrador",
+  consulta: "Consulta",
+  calibrador: "Calibrador",
+  operacional: "Operacional",
+};
+
 export default function PerfilPage() {
   useDocumentTitle("Meu Perfil");
   const { user } = useAuth();
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
+  const [gender, setGender] = useState(user?.gender ?? "");
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -58,7 +66,7 @@ export default function PerfilPage() {
               <div className={styles.avatarInfo}>
                 <div className={styles.avatarDetails}>
                   <span className={styles.avatarName}>{user?.name ?? "Usuário"}</span>
-                  <span className={styles.avatarRole}>{user?.role ?? "Visualizador"}</span>
+                  <span className={styles.avatarRole}>{user?.role ? ROLE_LABELS[user.role] : "Consulta"}</span>
                 </div>
                 <button type="button" className={styles.editPhotoBtn}>
                   <Camera size={16} />
@@ -84,9 +92,24 @@ export default function PerfilPage() {
                 />
               </div>
               <div className={styles.formRow}>
+                <div className={styles.selectField}>
+                  <label className={styles.selectLabel} htmlFor="profile-gender">
+                    Gênero
+                  </label>
+                  <select
+                    id="profile-gender"
+                    className={styles.select}
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                  >
+                    <option value="">Não informar</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="feminino">Feminino</option>
+                  </select>
+                </div>
                 <Field
                   label="Função/Cargo"
-                  value={user?.role ?? ""}
+                  value={user?.role ? ROLE_LABELS[user.role] : ""}
                   disabled
                   hint="A função não pode ser alterada diretamente pelo usuário."
                 />

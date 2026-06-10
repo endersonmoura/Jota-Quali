@@ -12,7 +12,8 @@ interface Props {
   onEdit: (eq: Equipamento) => void;
   onDelete: (eq: Equipamento) => void;
   onCalibrate?: (eq: Equipamento) => void;
-  mode?: "equipamentos" | "calibracao";
+  onSign?: (eq: Equipamento) => void;
+  mode?: "equipamentos" | "calibracao" | "laudos";
   sortField?: SortField;
   sortDirection?: SortDirection;
   onSort?: (field: SortField) => void;
@@ -25,7 +26,7 @@ function formatDate(iso: string | null): string {
   return `${d}/${m}/${y}`;
 }
 
-export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, mode = "equipamentos", sortField, sortDirection, onSort }: Props) {
+export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign, mode = "equipamentos", sortField, sortDirection, onSort }: Props) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [popup, setPopup] = useState<{ isOpen: boolean; type: 'padrao' | 'laudo'; title: string; content: string; hasFile: boolean } | null>(null);
 
@@ -67,7 +68,11 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, mode =
             {renderSortHeader("Nome", "nome")}
             {renderSortHeader("Última calibração", "ultimaCalibracao")}
             {renderSortHeader("Localização", "localizacao")}
-            {renderSortHeader("Status", "status")}
+            {mode === "laudos" ? (
+              <th className={styles.sortableHeader}>Status do Laudo</th>
+            ) : (
+              renderSortHeader("Status", "status")
+            )}
             <th className={styles.actionsHead} aria-label="Ações" />
           </tr>
         </thead>
@@ -99,7 +104,21 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, mode =
                   <td>{formatDate(eq.ultimaCalibracao)}</td>
                   <td>{eq.localizacao || "—"}</td>
                   <td>
-                    <StatusBadge status={eq.status} />
+                    {mode === "laudos" ? (
+                      eq.statusLaudo === "aguardando_assinatura" ? (
+                        <span style={{ display: "inline-flex", alignItems: "center", padding: "0.25rem 0.5rem", borderRadius: "4px", backgroundColor: "var(--jq-warning-subtle)", color: "var(--jq-warning)", fontSize: "0.75rem", fontWeight: 500 }}>
+                          Aguardando Assinatura
+                        </span>
+                      ) : eq.statusLaudo === "assinado" ? (
+                        <span style={{ display: "inline-flex", alignItems: "center", padding: "0.25rem 0.5rem", borderRadius: "4px", backgroundColor: "var(--jq-success-subtle)", color: "var(--jq-success)", fontSize: "0.75rem", fontWeight: 500 }}>
+                          Assinado
+                        </span>
+                      ) : (
+                        "—"
+                      )
+                    ) : (
+                      <StatusBadge status={eq.status} />
+                    )}
                   </td>
                   <td>
                     <div className={styles.actions}>
@@ -116,6 +135,22 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, mode =
                         >
                           <Wrench size={16} />
                         </button>
+                      ) : mode === "laudos" ? (
+                        eq.statusLaudo === "aguardando_assinatura" && onSign && (
+                          <button
+                            type="button"
+                            className={styles.iconBtn}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSign(eq);
+                            }}
+                            aria-label={`Assinar laudo ${eq.tag}`}
+                            title="Assinar com GOV.BR"
+                            style={{ backgroundColor: "var(--jq-primary)", color: "#fff", width: "auto", padding: "0 0.5rem", borderRadius: "4px", gap: "0.25rem" }}
+                          >
+                            <CheckCircle2 size={14} /> Assinar
+                          </button>
+                        )
                       ) : (
                         <>
                           <button
@@ -190,6 +225,12 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, mode =
                               ) : (
                                 <><XCircle size={16} color="var(--jq-danger)" /> Não</>
                               )}
+                            </span>
+                          </div>
+                          <div className={styles.expandedItem}>
+                            <span className={styles.expandedLabel}>Tipo de Calibração</span>
+                            <span className={styles.expandedValue}>
+                              {eq.tipoCalibracao === "laboratorio" ? "Em Laboratório" : eq.tipoCalibracao === "campo" ? "Em Campo" : "Não definido"}
                             </span>
                           </div>
                           <div className={styles.expandedItem}>

@@ -102,3 +102,36 @@
   color: var(--jq-text-muted);
   text-transform: capitalize;
 }
+
+.selectField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.selectLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--jq-text);
+}
+
+.select {
+  appearance: none;
+  background-color: var(--jq-surface);
+  border: 1px solid var(--jq-border);
+  border-radius: 6px;
+  color: var(--jq-text);
+  font-family: inherit;
+  font-size: 0.875rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  width: 100%;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--jq-primary);
+  box-shadow: 0 0 0 2px var(--jq-primary-subtle);
+}

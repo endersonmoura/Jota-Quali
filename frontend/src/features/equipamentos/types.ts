@@ -9,6 +9,7 @@ export interface Equipamento {
   status: StatusEquipamento;
   padrao?: string;
   laudoAssinado?: boolean;
+  tipoCalibracao?: "laboratorio" | "campo";
   createdAt: string;
 }
 

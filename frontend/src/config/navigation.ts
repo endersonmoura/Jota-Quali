@@ -67,12 +67,6 @@ export const NAV_SECTIONS: NavSection[] = [
         icon: PenTool,
         description: "Assinatura eletrônica de documentos",
       },
-      {
-        label: "Rastreabilidade",
-        to: ROUTES.rastreabilidade,
-        icon: GitBranch,
-        description: "Histórico e cadeia de custódia",
-      },
     ],
   },
   {

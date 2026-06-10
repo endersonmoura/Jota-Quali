@@ -25,9 +25,6 @@ const LaudosPage = lazy(() => import("@/pages/LaudosPage/LaudosPage"));
 const AssinaturaDigitalPage = lazy(
   () => import("@/pages/AssinaturaDigitalPage/AssinaturaDigitalPage")
 );
-const RastreabilidadePage = lazy(
-  () => import("@/pages/RastreabilidadePage/RastreabilidadePage")
-);
 const UsuariosPage = lazy(() => import("@/pages/UsuariosPage/UsuariosPage"));
 const ConfiguracoesPage = lazy(
   () => import("@/pages/ConfiguracoesPage/ConfiguracoesPage")
@@ -76,10 +73,6 @@ export function AppRouter() {
                 <Route
                   path={ROUTES.assinaturaDigital}
                   element={<AssinaturaDigitalPage />}
-                />
-                <Route
-                  path={ROUTES.rastreabilidade}
-                  element={<RastreabilidadePage />}
                 />
                 <Route path={ROUTES.usuarios} element={<UsuariosPage />} />
                 <Route path={ROUTES.configuracoes} element={<ConfiguracoesPage />} />

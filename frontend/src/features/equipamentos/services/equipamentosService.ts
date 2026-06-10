@@ -1,7 +1,7 @@
 import { storage } from "@/lib/storage";
 import type { Equipamento, EquipamentoInput } from "../types";
 
-const KEY = "jq:equipamentos";
+const KEY = "jq:equipamentos:v3";
 
 const SEED: Equipamento[] = [
   {
@@ -35,6 +35,7 @@ const SEED: Equipamento[] = [
     status: "manutencao",
     padrao: "NBR 17025",
     laudoAssinado: false,
+    statusLaudo: "aguardando_assinatura",
     createdAt: "2025-02-02T09:00:00.000Z",
   },
   {

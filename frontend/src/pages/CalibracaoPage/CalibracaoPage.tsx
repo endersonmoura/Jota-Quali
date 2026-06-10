@@ -11,6 +11,7 @@ import { Pagination } from "@/features/equipamentos/components/Pagination/Pagina
 import { EquipamentoFormDialog } from "@/features/equipamentos/components/EquipamentoFormDialog/EquipamentoFormDialog";
 import { ConfirmDialog } from "@/features/equipamentos/components/ConfirmDialog/ConfirmDialog";
 import type { Equipamento, EquipamentoInput } from "@/features/equipamentos/types";
+import { CalibracaoActionDialog } from "@/features/equipamentos/components/CalibracaoActionDialog/CalibracaoActionDialog";
 import styles from "../EquipamentosPage/EquipamentosPage.module.css";
 
 export default function CalibracaoPage() {
@@ -42,6 +43,7 @@ export default function CalibracaoPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Equipamento | null>(null);
   const [toDelete, setToDelete] = useState<Equipamento | null>(null);
+  const [toCalibrate, setToCalibrate] = useState<Equipamento | null>(null);
 
   const hasAnyItems = items.length > 0;
   const hasFilteredResults = total > 0;
@@ -79,6 +81,28 @@ export default function CalibracaoPage() {
     }
   }
 
+  function handleSelectCalibrationOption(option: "laboratorio" | "campo") {
+    if (!toCalibrate) return;
+    const tipo = option === "laboratorio" ? "laboratório" : "campo";
+    try {
+      update(toCalibrate.id, {
+        nome: toCalibrate.nome,
+        tag: toCalibrate.tag,
+        status: toCalibrate.status,
+        localizacao: toCalibrate.localizacao,
+        ultimaCalibracao: toCalibrate.ultimaCalibracao,
+        padrao: toCalibrate.padrao,
+        laudoAssinado: toCalibrate.laudoAssinado,
+        tipoCalibracao: option,
+      });
+      toast.success(`Iniciando calibração em ${tipo} para ${toCalibrate.tag}...`);
+    } catch (err) {
+      toast.error("Erro ao registrar a calibração.");
+    } finally {
+      setToCalibrate(null);
+    }
+  }
+
   return (
     <>
       <PageHeader
@@ -112,7 +136,7 @@ export default function CalibracaoPage() {
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={toggleSort}
-                onCalibrate={(eq) => toast.info(`Iniciando calibração/geração de laudo para ${eq.tag}...`)}
+                onCalibrate={(eq) => setToCalibrate(eq)}
               />
               <Pagination
                 page={page}
@@ -161,6 +185,13 @@ export default function CalibracaoPage() {
         confirmLabel="Excluir"
         onConfirm={handleConfirmDelete}
         onClose={() => setToDelete(null)}
+      />
+
+      <CalibracaoActionDialog
+        open={!!toCalibrate}
+        equipamento={toCalibrate}
+        onSelectOption={handleSelectCalibrationOption}
+        onClose={() => setToCalibrate(null)}
       />
     </>
   );

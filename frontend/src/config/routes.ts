@@ -8,7 +8,6 @@ export const ROUTES = {
   calibracao: "/calibracao",
   laudos: "/laudos",
   assinaturaDigital: "/assinatura-digital",
-  rastreabilidade: "/rastreabilidade",
   usuarios: "/usuarios",
   configuracoes: "/configuracoes",
   perfil: "/perfil",

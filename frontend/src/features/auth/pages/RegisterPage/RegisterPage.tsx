@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ChevronDown } from "lucide-react";
 import {
   AuthLayout,
   authLayoutStyles as s,
@@ -20,6 +20,7 @@ interface FormErrors {
   email?: string;
   password?: string;
   confirm?: string;
+  gender?: string;
   terms?: string;
 }
 
@@ -62,6 +63,8 @@ export default function RegisterPage() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [gender, setGender] = useState<"masculino" | "feminino" | "">("");
+  const [genderOpen, setGenderOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -83,6 +86,8 @@ export default function RegisterPage() {
     if (!required(email)) next.email = "Informe seu e-mail.";
     else if (!isEmail(email)) next.email = "E-mail inválido.";
 
+    if (!gender) next.gender = "Selecione seu gênero.";
+
     if (!required(password)) next.password = "Crie uma senha.";
     else if (pwdInfo.score < 4)
       next.password = "A senha não atende a todos os requisitos.";
@@ -102,7 +107,7 @@ export default function RegisterPage() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      await register({ name, email, password });
+      await register({ name, email, password, gender: gender as "masculino" | "feminino" });
       setSuccess(true);
       setTimeout(() => navigate(ROUTES.dashboard, { replace: true }), 1200);
     } catch (err) {
@@ -171,6 +176,33 @@ export default function RegisterPage() {
           error={errors.email}
           required
         />
+
+        <div className={styles.selectField} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <label className={styles.selectLabel} style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--jq-text)' }}>
+            Gênero
+          </label>
+          <div style={{ position: 'relative' }}>
+            <select
+              className={styles.select}
+              style={{ appearance: 'none', backgroundColor: 'var(--jq-surface)', border: `1px solid ${errors.gender ? 'var(--jq-danger)' : 'var(--jq-border)'}`, borderRadius: '6px', color: 'var(--jq-text)', fontFamily: 'inherit', fontSize: '0.875rem', height: '2.25rem', padding: '0 0.75rem', width: '100%', cursor: 'pointer' }}
+              value={gender}
+              onClick={() => setGenderOpen((prev) => !prev)}
+              onBlur={() => setGenderOpen(false)}
+              onChange={(e) => {
+                setGender(e.target.value as any);
+                setGenderOpen(false);
+              }}
+            >
+              <option value="" disabled>Selecione seu gênero</option>
+              <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
+            </select>
+            <div style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: `translateY(-50%) rotate(${genderOpen ? '180deg' : '0deg'})`, transition: 'transform 0.2s', pointerEvents: 'none', color: 'var(--jq-text-muted)' }}>
+              <ChevronDown size={16} />
+            </div>
+          </div>
+          {errors.gender && <span style={{ fontSize: '0.75rem', color: 'var(--jq-danger)' }}>{errors.gender}</span>}
+        </div>
 
         <div className={styles.grid2}>
           <Field
