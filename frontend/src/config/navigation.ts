@@ -7,6 +7,7 @@ import {
   GitBranch,
   Users,
   Settings,
+  Target,
   type LucideIcon,
 } from "lucide-react";
 import { ROUTES } from "./routes";
@@ -45,6 +46,12 @@ export const NAV_SECTIONS: NavSection[] = [
         description: "Cadastro e controle de equipamentos",
       },
       {
+        label: "Padrões",
+        to: ROUTES.padroes,
+        icon: Target,
+        description: "Gestão de padrões dos equipamentos",
+      },
+      {
         label: "Calibração",
         to: ROUTES.calibracao,
         icon: Gauge,
@@ -66,12 +73,6 @@ export const NAV_SECTIONS: NavSection[] = [
         to: ROUTES.assinaturaDigital,
         icon: PenTool,
         description: "Assinatura eletrônica de documentos",
-      },
-      {
-        label: "Rastreabilidade",
-        to: ROUTES.rastreabilidade,
-        icon: GitBranch,
-        description: "Histórico e cadeia de custódia",
       },
     ],
   },

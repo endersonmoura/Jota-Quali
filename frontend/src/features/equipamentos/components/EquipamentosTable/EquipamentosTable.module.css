@@ -105,6 +105,27 @@
   border-color: rgba(220, 38, 38, 0.2);
 }
 
+.signBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: var(--jq-primary);
+  color: var(--jq-white);
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  gap: 8px;
+  transition: filter var(--jq-dur-fast) var(--jq-ease);
+  line-height: 1;
+}
+.signBtn:hover {
+  filter: brightness(0.9);
+}
+
 /* Row Expansion */
 .expandBtn {
   display: inline-flex;

@@ -26,8 +26,7 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
             Confiabilidade técnica para a <em>construção civil</em>.
           </h2>
           <p className={styles.brandLead}>
-            Plataforma corporativa para controle de equipamentos, calibração,
-            laudos laboratoriais, assinatura digital e rastreabilidade.
+            Laudos laboratoriais e assinatura digital.
           </p>
 
           <ul className={styles.features}>
@@ -42,12 +41,6 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
                 <FileSignature size={14} />
               </span>
               Emissão e assinatura digital de laudos com validade legal
-            </li>
-            <li className={styles.feature}>
-              <span className={styles.featureIcon}>
-                <ShieldCheck size={14} />
-              </span>
-              Rastreabilidade total da cadeia de custódia
             </li>
           </ul>
         </div>

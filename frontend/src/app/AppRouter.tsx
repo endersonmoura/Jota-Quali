@@ -20,13 +20,11 @@ const ResetPasswordPage = lazy(
 
 const DashboardPage = lazy(() => import("@/pages/DashboardPage/DashboardPage"));
 const EquipamentosPage = lazy(() => import("@/pages/EquipamentosPage/EquipamentosPage"));
+const PadroesPage = lazy(() => import("@/pages/PadroesPage/PadroesPage"));
 const CalibracaoPage = lazy(() => import("@/pages/CalibracaoPage/CalibracaoPage"));
 const LaudosPage = lazy(() => import("@/pages/LaudosPage/LaudosPage"));
 const AssinaturaDigitalPage = lazy(
   () => import("@/pages/AssinaturaDigitalPage/AssinaturaDigitalPage")
-);
-const RastreabilidadePage = lazy(
-  () => import("@/pages/RastreabilidadePage/RastreabilidadePage")
 );
 const UsuariosPage = lazy(() => import("@/pages/UsuariosPage/UsuariosPage"));
 const ConfiguracoesPage = lazy(
@@ -71,15 +69,12 @@ export function AppRouter() {
               <Route element={<AppShell />}>
                 <Route path={ROUTES.dashboard} element={<DashboardPage />} />
                 <Route path={ROUTES.equipamentos} element={<EquipamentosPage />} />
+                <Route path={ROUTES.padroes} element={<PadroesPage />} />
                 <Route path={ROUTES.calibracao} element={<CalibracaoPage />} />
                 <Route path={ROUTES.laudos} element={<LaudosPage />} />
                 <Route
                   path={ROUTES.assinaturaDigital}
                   element={<AssinaturaDigitalPage />}
-                />
-                <Route
-                  path={ROUTES.rastreabilidade}
-                  element={<RastreabilidadePage />}
                 />
                 <Route path={ROUTES.usuarios} element={<UsuariosPage />} />
                 <Route path={ROUTES.configuracoes} element={<ConfiguracoesPage />} />

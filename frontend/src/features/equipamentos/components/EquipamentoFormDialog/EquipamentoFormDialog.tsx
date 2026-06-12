@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button/Button";
 import { Field } from "@/components/ui/Field/Field";
 import { Modal } from "../Modal/Modal";
+import { storage } from "@/lib/storage";
 import {
   STATUS_LABEL,
   type Equipamento,
@@ -32,9 +33,11 @@ export function EquipamentoFormDialog({ open, initial, onClose, onSubmit }: Prop
   const [form, setForm] = useState<EquipamentoInput>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [padroes, setPadroes] = useState<{ id: string; nome: string; codigo: string }[]>([]);
 
   useEffect(() => {
     if (!open) return;
+    setPadroes(storage.get<{ id: string; nome: string; codigo: string }[]>("jq:padroes:v1") || []);
     setErrors({});
     setForm(
       initial
@@ -44,8 +47,9 @@ export function EquipamentoFormDialog({ open, initial, onClose, onSubmit }: Prop
             ultimaCalibracao: initial.ultimaCalibracao,
             localizacao: initial.localizacao,
             status: initial.status,
+            padrao: initial.padrao || "",
           }
-        : EMPTY
+        : { ...EMPTY, padrao: "" }
     );
   }, [open, initial]);
 
@@ -63,6 +67,7 @@ export function EquipamentoFormDialog({ open, initial, onClose, onSubmit }: Prop
       else if (d > today) e.ultimaCalibracao = "Não pode ser uma data futura.";
     }
     if (input.localizacao.length > 80) e.localizacao = "Máximo de 80 caracteres.";
+    if (!input.padrao?.trim()) e.padrao = "Selecione um padrão.";
     return e;
   }
 
@@ -129,7 +134,7 @@ export function EquipamentoFormDialog({ open, initial, onClose, onSubmit }: Prop
               }
             >
               <option value="ativo">{STATUS_LABEL.ativo}</option>
-              <option value="manutencao">{STATUS_LABEL.manutencao}</option>
+              <option value="vencido">{STATUS_LABEL.vencido}</option>
               <option value="inativo">{STATUS_LABEL.inativo}</option>
             </select>
           </div>
@@ -163,6 +168,23 @@ export function EquipamentoFormDialog({ open, initial, onClose, onSubmit }: Prop
             error={errors.localizacao}
             hint="Opcional"
           />
+          <div className={styles.selectField}>
+            <label className={styles.selectLabel} htmlFor="eq-padrao">
+              Padrão<span className={styles.required}>*</span>
+            </label>
+            <select
+              id="eq-padrao"
+              className={styles.select}
+              value={form.padrao || ""}
+              onChange={(e) => setForm({ ...form, padrao: e.target.value })}
+              required
+            >
+              <option value="" disabled>Selecione um padrão</option>
+              {padroes.map(p => (
+                <option key={p.id} value={p.nome}>{p.codigo} - {p.nome}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </form>
     </Modal>

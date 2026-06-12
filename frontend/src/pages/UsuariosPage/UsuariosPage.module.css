@@ -1,0 +1,146 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  background-color: var(--jq-surface);
+  border: 1px solid var(--jq-border);
+  border-radius: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--jq-border);
+  color: var(--jq-text);
+}
+
+.table th {
+  font-weight: 500;
+  color: var(--jq-text-muted);
+  background-color: var(--jq-surface-alt);
+}
+
+.table tbody tr:hover {
+  background-color: var(--jq-surface-hover);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--jq-primary-subtle);
+  color: var(--jq-primary);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.userName {
+  font-weight: 600;
+}
+
+.userEmail {
+  color: var(--jq-text-muted);
+}
+
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background-color: var(--jq-surface-alt);
+  color: var(--jq-text-strong);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  color: var(--jq-text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.iconBtn:hover:not(:disabled) {
+  color: var(--jq-primary);
+  background-color: var(--jq-surface-hover);
+}
+
+.iconBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.selectField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.selectLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--jq-text);
+}
+
+.select {
+  appearance: none;
+  background-color: var(--jq-surface);
+  border: 1px solid var(--jq-border);
+  border-radius: 6px;
+  color: var(--jq-text);
+  font-family: inherit;
+  font-size: 0.875rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  width: 100%;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--jq-primary);
+  box-shadow: 0 0 0 2px var(--jq-primary-subtle);
+}

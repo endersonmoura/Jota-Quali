@@ -1,7 +1,7 @@
 import { storage } from "@/lib/storage";
 import type { Equipamento, EquipamentoInput } from "../types";
 
-const KEY = "jq:equipamentos";
+const KEY = "jq:equipamentos:v3";
 
 const SEED: Equipamento[] = [
   {
@@ -32,9 +32,10 @@ const SEED: Equipamento[] = [
     nome: "Estufa de secagem Quimis Q317M",
     ultimaCalibracao: "2024-11-20",
     localizacao: "Laboratório 2",
-    status: "manutencao",
+    status: "vencido",
     padrao: "NBR 17025",
     laudoAssinado: false,
+    statusLaudo: "aguardando_assinatura",
     createdAt: "2025-02-02T09:00:00.000Z",
   },
   {
@@ -83,7 +84,7 @@ const SEED: Equipamento[] = [
     nome: "Manômetro digital Wika CPG500",
     ultimaCalibracao: "2024-12-10",
     localizacao: "Sala de pressão",
-    status: "manutencao",
+    status: "vencido",
     padrao: "NBR 17025",
     laudoAssinado: false,
     createdAt: "2025-03-20T09:00:00.000Z",
@@ -143,7 +144,7 @@ const SEED: Equipamento[] = [
     nome: "Banho ultrassônico Unique USC-1400",
     ultimaCalibracao: "2024-10-18",
     localizacao: "Laboratório 1",
-    status: "manutencao",
+    status: "vencido",
     createdAt: "2025-04-15T09:00:00.000Z",
   },
   {
@@ -193,12 +194,19 @@ function readAll(): Equipamento[] {
     return [...SEED];
   }
 
-  // Inject missing seeds if user has an old version of localStorage
   let updated = false;
   const newData = [...data];
   for (const seedItem of SEED) {
     if (!newData.some((e) => e.id === seedItem.id)) {
       newData.push(seedItem);
+      updated = true;
+    }
+  }
+
+  // Migrate "manutencao" to "vencido"
+  for (const eq of newData) {
+    if (eq.status === "manutencao" as any) {
+      eq.status = "vencido";
       updated = true;
     }
   }

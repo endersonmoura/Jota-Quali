@@ -1,0 +1,98 @@
+.wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--jq-border);
+  border-radius: var(--jq-radius-lg);
+  background: var(--jq-white);
+  margin-top: 2rem;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--jq-fs-md);
+  color: var(--jq-text);
+}
+.table thead th {
+  text-align: left;
+  font-size: var(--jq-fs-xs);
+  font-weight: var(--jq-fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--jq-text-muted);
+  background: var(--jq-surface-2);
+  padding: var(--jq-sp-3) var(--jq-sp-4);
+  border-bottom: 1px solid var(--jq-border);
+}
+
+.sortableHeader {
+  user-select: none;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: var(--jq-sp-2);
+}
+
+.table tbody td {
+  padding: var(--jq-sp-3) var(--jq-sp-4);
+  border-bottom: 1px solid var(--jq-border);
+  vertical-align: middle;
+}
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+.table tbody tr:hover {
+  background: var(--jq-surface-2);
+}
+
+.tag {
+  font-family: var(--jq-font-mono);
+  font-weight: var(--jq-fw-semibold);
+  color: var(--jq-text-strong);
+  white-space: nowrap;
+}
+.nome {
+  color: var(--jq-text-strong);
+  font-weight: var(--jq-fw-medium);
+}
+.actionsHead {
+  width: 1%;
+  text-align: right;
+}
+.actions {
+  display: inline-flex;
+  gap: var(--jq-sp-1);
+  justify-content: flex-end;
+}
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--jq-radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--jq-text-muted);
+  cursor: pointer;
+  transition: background var(--jq-dur-fast) var(--jq-ease),
+    color var(--jq-dur-fast) var(--jq-ease),
+    border-color var(--jq-dur-fast) var(--jq-ease);
+}
+.iconBtn:hover {
+  background: var(--jq-muted);
+  color: var(--jq-text-strong);
+}
+.iconBtnDanger:hover {
+  background: var(--jq-danger-soft);
+  color: var(--jq-danger);
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0;
+}

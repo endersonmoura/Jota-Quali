@@ -2,14 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, LogOut, Menu, Search, Settings, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { ROLE_LABELS } from "@/features/auth/types";
 import { ROUTES } from "@/config/routes";
 import styles from "./Header.module.css";
 
 export interface HeaderProps {
   onToggleSidebar: () => void;
+  hideMenuBtn?: boolean;
 }
 
-export function Header({ onToggleSidebar }: HeaderProps) {
+export function Header({ onToggleSidebar, hideMenuBtn }: HeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -38,14 +40,18 @@ export function Header({ onToggleSidebar }: HeaderProps) {
 
   return (
     <header className={styles.header}>
-      <button
-        type="button"
-        className={styles.iconBtn}
-        onClick={onToggleSidebar}
-        aria-label="Alternar menu"
-      >
-        <Menu size={18} />
-      </button>
+      {hideMenuBtn ? (
+        <div style={{ width: "32px", height: "32px", visibility: "hidden" }} />
+      ) : (
+        <button
+          type="button"
+          className={styles.iconBtn}
+          onClick={onToggleSidebar}
+          aria-label="Alternar menu"
+        >
+          <Menu size={18} />
+        </button>
+      )}
 
       <div className={styles.search}>
         <Search size={16} className={styles.searchIcon} />
@@ -79,7 +85,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
           </span>
           <span className={styles.userMeta}>
             <span className={styles.userName}>{user?.name ?? "Usuário"}</span>
-            <span className={styles.userRole}>{user?.role ?? ""}</span>
+            <span className={styles.userRole}>{user?.role ? ROLE_LABELS[user.role] : ""}</span>
           </span>
         </button>
 

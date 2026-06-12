@@ -2,8 +2,9 @@ export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "tecnico" | "qualidade" | "viewer";
+  role: "admin" | "consulta" | "calibrador" | "operacional" | "aguardando_aprovacao";
   avatarInitials: string;
+  gender?: "masculino" | "feminino";
 }
 
 export interface AuthSession {
@@ -28,4 +29,13 @@ export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
+  gender: "masculino" | "feminino";
 }
+
+export const ROLE_LABELS: Record<string, string> = {
+  admin: "Administrador",
+  consulta: "Consulta",
+  calibrador: "Calibrador",
+  operacional: "Operacional",
+  aguardando_aprovacao: "Aguardando Aprovação",
+};

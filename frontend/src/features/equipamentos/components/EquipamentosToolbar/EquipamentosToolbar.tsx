@@ -38,7 +38,7 @@ export function EquipamentosToolbar({
         >
           <option value="todos">Todos</option>
           <option value="ativo">{STATUS_LABEL.ativo}</option>
-          <option value="manutencao">{STATUS_LABEL.manutencao}</option>
+          <option value="vencido">{STATUS_LABEL.vencido}</option>
           <option value="inativo">{STATUS_LABEL.inativo}</option>
         </select>
       </label>
