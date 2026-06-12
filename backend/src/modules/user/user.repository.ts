@@ -7,15 +7,15 @@ import { CreateUserRecordDTO } from "./user.dto";
 
 export class UserRepository {
   private get em(): EntityManager {
-    return DI.em.fork();
+    return DI.em;
   }
 
   public async findByEmail(email: string): Promise<Usuario | null> {
     return this.em.findOne(Usuario, { email });
   }
 
-  public async findById(id: string): Promise<Usuario | null> {
-    return this.em.findOne(Usuario, { id });
+  public async findById(id: number): Promise<Usuario | null> {
+    return this.em.findOne(Usuario, { id }, { populate: ['perfil'] });
   }
 
   public async count(): Promise<number> {
@@ -23,11 +23,11 @@ export class UserRepository {
   }
 
   public async findAll(): Promise<Usuario[]> {
-    return this.em.find(Usuario, {});
+    return this.em.find(Usuario, {}, { populate: ['perfil'] });
   }
 
   public async findPending(): Promise<Usuario[]> {
-    return this.em.find(Usuario, { status: "PENDING" });
+    return this.em.find(Usuario, { status: "inativo" }, { populate: ['perfil'] });
   }
 
   public update(user: Usuario, data: Partial<Usuario>): void {
@@ -42,10 +42,12 @@ export class UserRepository {
     const user = this.em.create(Usuario, {
       nome: data.name,
       email: data.email,
-      senha: data.passwordHash,
-      perfil: data.role,
+      senhaHash: data.passwordHash,
+      cpf: data.cpf,
+      perfil: data.perfilId,
       status: data.status,
-      createdAt: new Date(),
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     });
     this.em.persist(user);
     await this.em.flush();

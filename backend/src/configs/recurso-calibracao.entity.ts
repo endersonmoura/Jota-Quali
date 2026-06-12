@@ -5,18 +5,28 @@ import {
   ManyToOne,
 } from "@mikro-orm/decorators/legacy";
 import { Calibracao } from "./calibracao.entity";
+import { Documento } from "./documento.entity";
 
 @Entity({ tableName: "recurso_calibracao", schema: "dbo" })
 export class RecursoCalibracao {
-  @PrimaryKey({ type: "uuid", defaultRaw: "NEWID()" })
-  id!: string;
+  @PrimaryKey({ type: "int" })
+  id!: number;
 
-  @ManyToOne(() => Calibracao, { fieldName: "calibracao_id" })
-  calibracao!: Calibracao;
+  @ManyToOne(() => Calibracao, { fieldName: "calibracao_id", nullable: true })
+  calibracao?: Calibracao;
 
-  @Property({ fieldName: "nome_recurso", type: "varchar", length: 255 })
-  nomeRecurso!: string;
+  @ManyToOne(() => Documento, { fieldName: "documento_id", nullable: true })
+  documento?: Documento;
 
-  @Property({ fieldName: "created_at", type: "datetime" })
-  createdAt: Date = new Date();
+  @Property({ fieldName: "item_descricao", type: "varchar", length: 200 })
+  itemDescricao!: string;
+
+  @Property({ type: "varchar", length: 50, nullable: true })
+  quantidade?: string;
+
+  @Property({ fieldName: "tipo_recurso", type: "varchar", length: 50, nullable: true })
+  tipoRecurso?: string;
+
+  @Property({ fieldName: "criado_em", type: "datetime2" })
+  criadoEm: Date = new Date();
 }

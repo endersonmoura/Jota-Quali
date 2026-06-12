@@ -7,6 +7,10 @@ import { SolicitacaoCalibracao } from "./configs/solicitacao-calibracao.entity";
 import { Documento } from "./configs/documento.entity";
 import { AuditLog } from "./configs/audit.entity";
 import { RecursoCalibracao } from "./configs/recurso-calibracao.entity";
+import { Notificacao } from "./configs/notificacao.entity";
+import { AssinaturaDigital } from "./configs/assinatura-digital.entity";
+import { Perfil } from "./configs/perfil.entity";
+import { PadraoReferencia } from "./configs/padrao-referencia.entity";
 
 export default defineConfig({
   driver: MsSqlDriver,
@@ -23,6 +27,10 @@ export default defineConfig({
     Documento,
     AuditLog,
     RecursoCalibracao,
+    Notificacao,
+    AssinaturaDigital,
+    Perfil,
+    PadraoReferencia,
   ],
   debug: env.nodeEnv === "development",
   dynamicImportProvider: (id) => import(id),

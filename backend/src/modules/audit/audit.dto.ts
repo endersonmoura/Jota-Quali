@@ -1,17 +1,17 @@
 export interface CreateAuditDTO {
-  userId: string;
+  userId: number;
   action: string;
   resource: string;
-  resourceId?: string;
+  resourceId?: number;
   details?: string;
 }
 
 export interface AuditResponseDTO {
-  id: string;
-  userId: string;
+  id: number;
+  userId: number;
   action: string;
   resource: string;
-  resourceId?: string;
+  resourceId?: number;
   details?: string;
   createdAt: Date;
 }

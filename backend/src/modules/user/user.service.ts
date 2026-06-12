@@ -11,9 +11,9 @@ export class UserService {
       id: user.id,
       name: user.nome,
       email: user.email,
-      role: user.perfil,
+      role: user.perfil ? String(user.perfil.nomePerfil || user.perfil.id || user.perfil) : "N/A",
       status: user.status,
-      createdAt: user.createdAt,
+      createdAt: user.criadoEm,
     }));
   }
 
@@ -23,15 +23,15 @@ export class UserService {
       id: user.id,
       name: user.nome,
       email: user.email,
-      role: user.perfil,
+      role: user.perfil ? String(user.perfil.nomePerfil || user.perfil.id || user.perfil) : "N/A",
       status: user.status,
-      createdAt: user.createdAt,
+      createdAt: user.criadoEm,
     }));
   }
 
   public async updateStatus(
-    targetUserId: string,
-    newStatus: "APPROVED" | "REJECTED",
+    targetUserId: number,
+    newStatus: string,
   ): Promise<void> {
     const user = await this.repository.findById(targetUserId);
     if (!user) {

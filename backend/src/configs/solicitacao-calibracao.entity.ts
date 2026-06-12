@@ -5,27 +5,37 @@ import {
   ManyToOne,
 } from "@mikro-orm/decorators/legacy";
 import { Equipamento } from "./equipamento.entity";
+import { Usuario } from "./usuario.entity";
 
 @Entity({ tableName: "solicitacao_calibracao", schema: "dbo" })
 export class SolicitacaoCalibracao {
-  @PrimaryKey({ type: "uuid", defaultRaw: "NEWID()" })
-  id!: string;
+  @PrimaryKey({ type: "int" })
+  id!: number;
 
   @ManyToOne(() => Equipamento, { fieldName: "equipamento_id" })
   equipamento!: Equipamento;
 
-  @Property({ type: "varchar", length: 50 })
-  tipo!: "EXTERNA" | "INTERNA";
+  @ManyToOne(() => Usuario, { fieldName: "usuario_solicitante_id" })
+  usuarioSolicitante!: Usuario;
 
-  @Property({ fieldName: "prazo_retorno_dias", type: "int" })
-  prazoRetornoDias!: number;
+  @Property({ fieldName: "tipo_calibracao", type: "varchar", length: 10 })
+  tipoCalibracao!: string;
 
-  @Property({ fieldName: "solicitante_id", type: "uuid" })
-  solicitanteId!: string;
+  @Property({ fieldName: "data_solicitacao", type: "date" })
+  dataSolicitacao: Date = new Date();
 
-  @Property({ type: "varchar", length: 50, default: "PENDENTE" })
+  @Property({ fieldName: "prazo_retorno", type: "date" })
+  prazoRetorno!: Date;
+
+  @Property({ type: "varchar", length: 30, default: "aberta" })
   status!: string;
 
-  @Property({ fieldName: "created_at", type: "datetime" })
-  createdAt: Date = new Date();
+  @Property({ type: "nvarchar", columnType: "nvarchar(max)", nullable: true })
+  observacao?: string;
+
+  @Property({ fieldName: "criado_em", type: "datetime2" })
+  criadoEm: Date = new Date();
+
+  @Property({ fieldName: "atualizado_em", type: "datetime2", onUpdate: () => new Date() })
+  atualizadoEm: Date = new Date();
 }

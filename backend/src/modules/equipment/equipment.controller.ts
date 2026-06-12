@@ -37,7 +37,7 @@ export class EquipmentController {
   ): Promise<void> => {
     try {
       const { id } = req.params;
-      const equipment = await this.service.getEquipmentById(id);
+      const equipment = await this.service.getEquipmentById(Number(id));
       res.status(200).json(equipment);
     } catch (error) {
       next(error);
@@ -51,7 +51,7 @@ export class EquipmentController {
   ): Promise<void> => {
     try {
       const { id } = req.params;
-      await this.service.updateEquipment(id, req.body);
+      await this.service.updateEquipment(Number(id), req.body);
       res.status(200).json({ message: "Equipamento atualizado com sucesso." });
     } catch (error) {
       next(error);
@@ -65,7 +65,7 @@ export class EquipmentController {
   ): Promise<void> => {
     try {
       const { id } = req.params;
-      await this.service.deleteEquipment(id);
+      await this.service.deleteEquipment(Number(id));
       res.status(200).json({ message: "Equipamento inativado com sucesso." });
     } catch (error) {
       next(error);

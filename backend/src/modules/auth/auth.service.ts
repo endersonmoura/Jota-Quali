@@ -33,8 +33,9 @@ export class AuthService {
       name: data.name.trim(),
       email: safeEmail,
       passwordHash,
-      role: isFirstUser ? "ADMINISTRADOR" : "CONSULTA",
-      status: isFirstUser ? "APPROVED" : "PENDING",
+      cpf: data.cpf,
+      perfilId: isFirstUser ? 1 : 4,
+      status: isFirstUser ? "ativo" : "inativo",
     });
 
     // Enfileira a criação do usuário e dispara efetivamente o INSERT no banco
@@ -48,28 +49,21 @@ export class AuthService {
     const safeEmail = data.email?.trim().toLowerCase();
     const user = await this.repository.findByEmail(safeEmail);
 
-    if (!user || !(await bcrypt.compare(data.password, user.senha))) {
+    if (!user || !(await bcrypt.compare(data.password, user.senhaHash))) {
       throw new AppError("Credenciais inválidas", 401, "INVALID_CREDENTIALS");
     }
 
     // Validando o status do usuário recém cadastrado
-    if (user.status === "PENDING") {
+    if (user.status === "inativo") {
       throw new AppError(
-        "Sua conta aguarda aprovação do Administrador.",
+        "Sua conta aguarda aprovação do Administrador (inativa).",
         403,
         "PENDING_APPROVAL",
       );
     }
-    if (user.status === "REJECTED") {
-      throw new AppError(
-        "Seu acesso foi negado pelo Administrador.",
-        403,
-        "ACCESS_REJECTED",
-      );
-    }
 
     const { token, expiresIn } = this.signToken({
-      sub: user.id,
+      sub: user.id.toString(),
       email: user.email,
     });
 
@@ -109,9 +103,9 @@ export class AuthService {
       id: user.id,
       name: user.nome,
       email: user.email,
-      role: user.perfil,
+      role: user.perfil ? String(user.perfil.id || user.perfil) : "N/A",
       status: user.status,
-      createdAt: user.createdAt,
+      createdAt: user.criadoEm,
     };
   }
 }

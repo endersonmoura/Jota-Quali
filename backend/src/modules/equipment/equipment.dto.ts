@@ -1,10 +1,13 @@
 export interface EquipmentDTO {
-  Id?: string;
-  Nome: string;
-  CodigoPatrimonio: string;
-  ObraId?: string | null;
+  id?: number;
+  codigo: string;
   descricao: string;
-  tipo: string;
-  dataAquisicao?: Date;
-  status?: "Disponivel" | "Em Manutencao" | "Calibracao" | "Inativo";
+  tipo?: string;
+  obraId?: number | null;
+  status?: string;
+  situacaoDocumental?: string;
+  dataCadastro?: Date;
+  dataUltimaCalibracao?: Date;
+  dataVencimentoCalibracao?: Date;
+  criadoPorId?: number;
 }

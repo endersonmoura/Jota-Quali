@@ -1,14 +1,14 @@
 export interface SolicitarCalibracaoDTO {
-  equipamentoId: string;
+  equipamentoId: number;
   tipo: "EXTERNA" | "INTERNA";
   prazoRetornoDias: number;
-  solicitanteId: string;
+  solicitanteId: number;
 }
 
 export interface RegistrarCalibracaoInternaDTO {
-  equipamentoId: string;
-  equipamentoReferenciaId: string;
+  equipamentoId: number;
+  equipamentoReferenciaId: number;
   dataCalibracao: Date;
   validade: Date;
-  calibradorId: string;
+  calibradorId: number;
 }

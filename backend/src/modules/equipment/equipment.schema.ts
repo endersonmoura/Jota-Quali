@@ -1,43 +1,38 @@
 import { z } from "zod";
 
+const STATUS_ENUM = z.enum([
+  "disponivel", "indisponivel", "vencido", 
+  "pendente_assinatura", "pendente_documento", 
+  "calibracao_solicitada", "em_calibracao", "em_manutencao"
+]);
+
 export const createEquipmentSchema = z.object({
   body: z.object({
-    descricao: z
-      .string({ message: "A descrição é obrigatória." })
-      .min(1, "A descrição não pode ser vazia."),
-    codigo: z
-      .string({ message: "O código é obrigatório." })
-      .min(1, "O código não pode ser vazio."),
-    tipo: z
-      .string({ message: "O tipo é obrigatório." })
-      .min(1, "O tipo não pode ser vazio."),
-    // z.coerce.date() tenta converter automaticamente a string (ex: "2024-03-10") vinda do JSON para um objeto Date
-    dataAquisicao: z.coerce
-      .date({
-        message: "A data de aquisição deve ser uma data válida.",
-      })
-      .optional(),
-    status: z
-      .enum(["Disponivel", "Em Manutencao", "Calibracao", "Inativo"])
-      .optional(),
+    descricao: z.string().min(1, "A descrição não pode ser vazia."),
+    codigo: z.string().min(1, "O código não pode ser vazio."),
+    tipo: z.string().optional(),
+    obraId: z.number().optional(),
+    status: STATUS_ENUM.optional(),
+    situacaoDocumental: z.enum(["regular", "pendente", "irregular"]).optional(),
+    dataCadastro: z.coerce.date().optional(),
+    dataUltimaCalibracao: z.coerce.date().optional(),
+    dataVencimentoCalibracao: z.coerce.date().optional(),
   }),
 });
 
 export const updateEquipmentSchema = z.object({
   params: z.object({
-    id: z.string().uuid("O ID do equipamento na rota deve ser um UUID válido."),
+    id: z.string().regex(/^\d+$/, "O ID do equipamento deve ser numérico."),
   }),
   body: z.object({
-    descricao: z.string().min(1, "A descrição não pode ser vazia.").optional(),
-    codigo: z.string().min(1, "O código não pode ser vazio.").optional(),
-    tipo: z.string().min(1, "O tipo não pode ser vazio.").optional(),
-    dataAquisicao: z.coerce
-      .date({
-        message: "A data de aquisição deve ser uma data válida.",
-      })
-      .optional(),
-    status: z
-      .enum(["Disponivel", "Em Manutencao", "Calibracao", "Inativo"])
-      .optional(),
+    descricao: z.string().min(1).optional(),
+    codigo: z.string().min(1).optional(),
+    tipo: z.string().optional(),
+    obraId: z.number().optional(),
+    status: STATUS_ENUM.optional(),
+    situacaoDocumental: z.enum(["regular", "pendente", "irregular"]).optional(),
+    dataCadastro: z.coerce.date().optional(),
+    dataUltimaCalibracao: z.coerce.date().optional(),
+    dataVencimentoCalibracao: z.coerce.date().optional(),
   }),
 });

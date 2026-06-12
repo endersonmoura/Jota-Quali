@@ -9,6 +9,7 @@ import {
 import { Calibracao } from "../../configs/calibracao.entity";
 import { SolicitacaoCalibracao } from "../../configs/solicitacao-calibracao.entity";
 import { Documento } from "../../configs/documento.entity";
+import { PadraoReferencia } from "../../configs/padrao-referencia.entity";
 
 export class CalibrationRepository {
   private get em(): EntityManager {
@@ -19,9 +20,10 @@ export class CalibrationRepository {
    * Método solicitado de Exemplo: Busca uma calibração por ID com relacionamentos populados
    */
   public async getCalibracaoComDetalhes(
-    id: string,
+    id: number,
   ): Promise<Calibracao | null> {
-    return this.em.findOne(
+    const em = this.em;
+    return em.findOne(
       Calibracao,
       { id },
       {
@@ -32,59 +34,68 @@ export class CalibrationRepository {
 
   public async createSolicitacao(
     data: SolicitarCalibracaoDTO,
-  ): Promise<string> {
-    const solicitacao = this.em.create(SolicitacaoCalibracao, {
+  ): Promise<number> {
+    const em = this.em;
+    const solicitacao = em.create(SolicitacaoCalibracao, {
       equipamento: data.equipamentoId, // MikroORM injeta automaticamente como referência (FK)
-      tipo: data.tipo,
-      prazoRetornoDias: data.prazoRetornoDias,
-      solicitanteId: data.solicitanteId,
-      status: "PENDENTE",
-      createdAt: new Date(),
+      tipoCalibracao: data.tipo,
+      prazoRetorno: new Date(Date.now() + data.prazoRetornoDias * 86400000),
+      usuarioSolicitante: data.solicitanteId,
+      status: "aberta",
+      dataSolicitacao: new Date(),
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     });
-    this.em.persist(solicitacao);
-    await this.em.flush();
+    em.persist(solicitacao);
+    await em.flush();
     return solicitacao.id;
   }
 
   public async getValidadeEquipamento(
-    equipamentoId: string,
+    equipamentoReferenciaId: number,
   ): Promise<Date | null> {
-    const calibracao = await this.em.findOne(
-      Calibracao,
-      { equipamento: equipamentoId },
-      { orderBy: { dataCalibracao: "DESC" } },
-    );
-    return calibracao?.validade || null;
+    const em = this.em;
+    const padrao = await em.findOne(PadraoReferencia, { id: equipamentoReferenciaId });
+    return padrao?.validade || null;
   }
 
   public async createCalibracao(
     data: RegistrarCalibracaoInternaDTO,
-  ): Promise<string> {
-    const calibracao = this.em.create(Calibracao, {
+  ): Promise<number> {
+    const em = this.em;
+    const calibracao = em.create(Calibracao, {
       equipamento: data.equipamentoId,
-      equipamentoReferencia: data.equipamentoReferenciaId,
-      dataCalibracao: data.dataCalibracao,
-      validade: data.validade,
-      calibradorId: data.calibradorId,
-      createdAt: new Date(),
+      padraoReferencia: data.equipamentoReferenciaId,
+      tipo: "interna",
+      dataRealizacao: data.dataCalibracao,
+      dataValidade: data.validade,
+      usuario: data.calibradorId,
+      status: "pendente_documento",
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     });
-    this.em.persist(calibracao);
-    await this.em.flush();
+    em.persist(calibracao);
+    await em.flush();
     return calibracao.id;
   }
 
   public async createDocumento(
-    calibracaoId: string,
+    calibracaoId: number,
     url: string,
-  ): Promise<string> {
-    const documento = this.em.create(Documento, {
+  ): Promise<number> {
+    const em = this.em;
+    const documento = em.create(Documento, {
       calibracao: calibracaoId,
-      caminhoArquivo: url,
-      assinado: false,
-      createdAt: new Date(),
+      pathArquivo: url,
+      statusAssinatura: false,
+      tipoDocumental: "pdf_calibracao_interna",
+      dataEmissao: new Date(),
+      dataVencimento: new Date(Date.now() + 365*86400000), // temp
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     });
-    this.em.persist(documento);
-    await this.em.flush();
+    em.persist(documento);
+    await em.flush();
     return documento.id;
   }
 }

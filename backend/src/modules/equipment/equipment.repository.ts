@@ -6,7 +6,7 @@ import { Equipamento } from "../../configs/equipamento.entity";
 
 export class EquipmentRepository {
   private get em(): EntityManager {
-    return DI.em.fork();
+    return DI.em;
   }
 
   public async create(
@@ -18,10 +18,10 @@ export class EquipmentRepository {
   }
 
   public async findAll(): Promise<Equipamento[]> {
-    return this.em.find(Equipamento, { status: { $ne: "Inativo" } });
+    return this.em.find(Equipamento, { status: { $ne: "inativo" } });
   }
 
-  public async findById(id: string): Promise<Equipamento | null> {
+  public async findById(id: number): Promise<Equipamento | null> {
     return this.em.findOne(Equipamento, { id });
   }
 

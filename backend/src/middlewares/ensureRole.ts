@@ -17,7 +17,7 @@ export const ensureRole = (allowedRoles: string[]) => {
     const repository = new UserRepository();
     const user = await repository.findById(userId);
 
-    if (!user || !allowedRoles.includes(user.role)) {
+    if (!user || !user.perfil || !allowedRoles.includes(user.perfil.nomePerfil)) {
       return next(
         new AppError(
           "Acesso negado: O seu perfil não possui permissão para esta ação.",

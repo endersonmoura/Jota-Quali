@@ -3,6 +3,6 @@ import { equipmentRoutes } from "./equipment.routes";
 
 const routes = Router();
 
-routes.use("/equipments", equipmentRoutes);
+routes.use("/", equipmentRoutes);
 
 export default routes;

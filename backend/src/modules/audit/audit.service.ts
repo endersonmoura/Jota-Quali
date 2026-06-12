@@ -7,8 +7,7 @@ export class AuditService {
 
   public async log(data: CreateAuditDTO): Promise<void> {
     try {
-      this.repository.create(data);
-      await this.repository.flush();
+      await this.repository.create(data);
       // RNF05: Gravar a ação crítica no logger para rastreabilidade de sistema
       logger.info(
         `[AUDIT] Usuário ${data.userId} realizou ${data.action} no recurso ${data.resource} (ID: ${data.resourceId || "N/A"})`,
@@ -22,17 +21,17 @@ export class AuditService {
     }
   }
 
-  public async getLogs(resourceId?: string): Promise<AuditResponseDTO[]> {
+  public async getLogs(resourceId?: number): Promise<AuditResponseDTO[]> {
     const logs = await this.repository.findLogsByResource(resourceId);
 
     return logs.map((log) => ({
       id: log.id,
-      userId: log.userId,
-      action: log.action,
-      resource: log.resource,
-      resourceId: log.resourceId,
-      details: log.details,
-      createdAt: log.createdAt,
+      userId: log.usuarioId,
+      action: log.acao,
+      resource: log.entidade,
+      resourceId: log.entidadeId,
+      details: log.detalhes,
+      createdAt: log.dataHora,
     }));
   }
 }

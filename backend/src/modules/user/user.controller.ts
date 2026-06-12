@@ -37,7 +37,7 @@ export class UserController {
   ): Promise<void> => {
     try {
       // Em uma aplicação real, checaremos aqui se o token logado tem "role: ADMIN"
-      await this.service.updateStatus(req.params.id, req.body.status);
+      await this.service.updateStatus(Number(req.params.id), req.body.status);
       res
         .status(200)
         .json({

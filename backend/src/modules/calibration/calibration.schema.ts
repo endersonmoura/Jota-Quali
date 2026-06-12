@@ -3,8 +3,9 @@ import { z } from "zod";
 export const solicitarCalibracaoSchema = z.object({
   body: z.object({
     equipamentoId: z
-      .string()
-      .uuid("O ID do equipamento deve ser um UUID válido."),
+      .number({ message: "O ID do equipamento deve ser numérico." })
+      .int()
+      .positive(),
     tipo: z.enum(["EXTERNA", "INTERNA"], {
       message: "O tipo de calibração deve ser EXTERNA ou INTERNA.",
     }),
@@ -12,18 +13,20 @@ export const solicitarCalibracaoSchema = z.object({
       .number()
       .int()
       .positive("O prazo de retorno deve ser maior que zero."),
-    solicitanteId: z.string().uuid().optional(), // Opcional, pois muitas vezes será extraído do Token JWT (req.user.id)
+    solicitanteId: z.number().int().positive().optional(), // Opcional, pois muitas vezes será extraído do Token JWT (req.user.id)
   }),
 });
 
 export const registrarCalibracaoInternaSchema = z.object({
   body: z.object({
     equipamentoId: z
-      .string()
-      .uuid("O ID do equipamento deve ser um UUID válido."),
+      .number({ message: "O ID do equipamento deve ser numérico." })
+      .int()
+      .positive(),
     equipamentoReferenciaId: z
-      .string()
-      .uuid("O ID do equipamento de referência deve ser um UUID válido."),
+      .number({ message: "O ID do equipamento de referência deve ser numérico." })
+      .int()
+      .positive(),
     // Recebemos as datas como string ISO do frontend e transformamos para Date nativo do JS
     dataCalibracao: z
       .string()
@@ -33,6 +36,6 @@ export const registrarCalibracaoInternaSchema = z.object({
       .string()
       .datetime()
       .transform((str) => new Date(str)),
-    calibradorId: z.string().uuid().optional(),
+    calibradorId: z.number().int().positive().optional(),
   }),
 });

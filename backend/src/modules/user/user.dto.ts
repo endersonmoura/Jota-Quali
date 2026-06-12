@@ -1,9 +1,9 @@
 export interface UserResponseDTO {
-  id: string;
+  id: number;
   name: string;
   email: string;
-  role: "ADMINISTRADOR" | "CALIBRADOR" | "OPERACIONAL" | "CONSULTA";
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  role: string;
+  status: string;
   createdAt: Date;
 }
 
@@ -11,6 +11,7 @@ export interface CreateUserRecordDTO {
   name: string;
   email: string;
   passwordHash: string;
-  role: "ADMINISTRADOR" | "CALIBRADOR" | "OPERACIONAL" | "CONSULTA";
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  cpf: string;
+  perfilId: number;
+  status: string;
 }

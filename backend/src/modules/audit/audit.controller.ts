@@ -13,7 +13,8 @@ export class AuditController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const resourceId = req.query.resourceId as string | undefined;
+      const resourceIdParam = req.query.resourceId as string | undefined;
+      const resourceId = resourceIdParam ? Number(resourceIdParam) : undefined;
       const logs = await this.service.getLogs(resourceId);
       res.status(200).json({ success: true, data: logs });
     } catch (error) {

@@ -14,8 +14,9 @@ export class CalibrationController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      // O 'userId' geralmente vem injetado de um Middleware de Autenticação em 'req.user'
-      const solicitanteId = (req as any).user?.id || req.body.solicitanteId;
+      // O 'userId' vem injetado do Middleware de Autenticação em 'res.locals.user'
+      const userIdFromToken = res.locals.user?.id ? Number(res.locals.user.id) : undefined;
+      const solicitanteId = userIdFromToken || req.body.solicitanteId || 1;
 
       const solicitacaoId = await this.service.solicitarCalibracao({
         ...req.body,
@@ -33,7 +34,8 @@ export class CalibrationController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      const calibradorId = (req as any).user?.id || req.body.calibradorId;
+      const userIdFromToken = res.locals.user?.id ? Number(res.locals.user.id) : undefined;
+      const calibradorId = userIdFromToken || req.body.calibradorId || 1;
 
       const calibracaoId = await this.service.registrarCalibracaoInterna({
         ...req.body,

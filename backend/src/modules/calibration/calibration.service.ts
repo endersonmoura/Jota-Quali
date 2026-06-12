@@ -23,7 +23,7 @@ export class CalibrationService {
    */
   public async solicitarCalibracao(
     data: SolicitarCalibracaoDTO,
-  ): Promise<string> {
+  ): Promise<number> {
     const solicitacaoId = await this.repository.createSolicitacao(data);
 
     // Regra Crítica 2: Auditar mutação de estado e acionamentos na DDL
@@ -43,7 +43,7 @@ export class CalibrationService {
    */
   public async registrarCalibracaoInterna(
     data: RegistrarCalibracaoInternaDTO,
-  ): Promise<string> {
+  ): Promise<number> {
     // Regra Crítica 3 (RN05): Verificar se o equipamento de referência possui calibração válida
     const validadeRef = await this.repository.getValidadeEquipamento(
       data.equipamentoReferenciaId,

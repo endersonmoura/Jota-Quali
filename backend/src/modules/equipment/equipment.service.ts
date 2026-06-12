@@ -7,22 +7,28 @@ export class EquipmentService {
   private repository = new EquipmentRepository();
 
   async createEquipment(data: EquipmentDTO): Promise<void> {
-    if (!data.descricao || !data.CodigoPatrimonio || !data.tipo) {
+    if (!data.descricao || !data.codigo || !data.tipo) {
       throw new AppError(
-        "Descrição, Código de Patrimônio e Tipo são obrigatórios.",
+        "Descrição, Código e Tipo são obrigatórios.",
         400,
       );
     }
 
     await this.repository.create({
       descricao: data.descricao.trim(),
-      codigo: data.CodigoPatrimonio.trim(),
+      codigo: data.codigo.trim(),
       tipo: data.tipo,
-      status: data.status || "Disponivel",
-      dataAquisicao: data.dataAquisicao
-        ? new Date(data.dataAquisicao)
-        : undefined,
-      createdAt: new Date(),
+      status: data.status || "disponivel",
+      situacaoDocumental: data.situacaoDocumental || "regular",
+      obra: data.obraId,
+      dataCadastro: data.dataCadastro
+        ? new Date(data.dataCadastro)
+        : new Date(),
+      dataUltimaCalibracao: data.dataUltimaCalibracao ? new Date(data.dataUltimaCalibracao) : undefined,
+      dataVencimentoCalibracao: data.dataVencimentoCalibracao ? new Date(data.dataVencimentoCalibracao) : undefined,
+      criadoPor: data.criadoPorId,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     });
 
     // Commit da transação (Unit of Work)
@@ -33,7 +39,7 @@ export class EquipmentService {
     return await this.repository.findAll();
   }
 
-  async getEquipmentById(id: string): Promise<Equipamento> {
+  async getEquipmentById(id: number): Promise<Equipamento> {
     const equipment = await this.repository.findById(id);
     if (!equipment) {
       throw new AppError("Equipamento não encontrado.", 404);
@@ -42,7 +48,7 @@ export class EquipmentService {
   }
 
   async updateEquipment(
-    id: string,
+    id: number,
     data: Partial<EquipmentDTO>,
   ): Promise<void> {
     if (!id)
@@ -57,14 +63,14 @@ export class EquipmentService {
     await this.repository.flush();
   }
 
-  async deleteEquipment(id: string): Promise<void> {
+  async deleteEquipment(id: number): Promise<void> {
     if (!id)
       throw new AppError("ID do equipamento é obrigatório para exclusão.", 400);
 
     const equipment = await this.getEquipmentById(id);
 
     // Soft delete: Altera o estado do modelo persistido e descarrega para o banco
-    await this.repository.update(equipment, { status: "Inativo" });
+    await this.repository.update(equipment, { status: "inativo" });
     await this.repository.flush();
   }
 }

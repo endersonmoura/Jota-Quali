@@ -10,24 +10,25 @@ export class AuditRepository {
     return DI.em.fork();
   }
 
-  public create(data: CreateAuditDTO): void {
-    const auditLog = this.em.create(AuditLog, {
-      userId: data.userId,
-      action: data.action,
-      resource: data.resource,
-      resourceId: data.resourceId,
-      details: data.details,
-      createdAt: new Date(),
+  public async create(data: CreateAuditDTO): Promise<void> {
+    const em = this.em;
+    const auditLog = em.create(AuditLog, {
+      usuarioId: data.userId,
+      acao: data.action,
+      entidade: data.resource,
+      entidadeId: data.resourceId || 0,
+      detalhes: data.details,
+      dataHora: new Date(),
     });
-    this.em.persist(auditLog);
+    em.persist(auditLog);
+    await em.flush();
   }
 
-  public async findLogsByResource(resourceId?: string): Promise<AuditLog[]> {
-    const query = resourceId ? { resourceId } : {};
-    return this.em.find(AuditLog, query, { orderBy: { createdAt: "DESC" } });
+  public async findLogsByResource(resourceId?: number): Promise<AuditLog[]> {
+    const em = this.em;
+    const query = resourceId ? { entidadeId: resourceId } : {};
+    return em.find(AuditLog, query, { orderBy: { dataHora: "DESC" } });
   }
 
-  public async flush(): Promise<void> {
-    await this.em.flush();
-  }
+
 }
