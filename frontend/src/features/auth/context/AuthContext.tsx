@@ -59,9 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (payload: RegisterPayload) => {
     setStatus("loading");
     try {
-      const next = await authService.register(payload);
-      setSession(next);
-      setStatus("authenticated");
+      await authService.register(payload);
+      setStatus("unauthenticated");
     } catch (err) {
       setStatus("unauthenticated");
       throw err;

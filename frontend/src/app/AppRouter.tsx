@@ -31,6 +31,7 @@ const ConfiguracoesPage = lazy(
   () => import("@/pages/ConfiguracoesPage/ConfiguracoesPage")
 );
 const PerfilPage = lazy(() => import("@/pages/PerfilPage/PerfilPage"));
+const RastreabilidadePage = lazy(() => import("@/pages/RastreabilidadePage/RastreabilidadePage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function PageFallback() {
@@ -79,6 +80,7 @@ export function AppRouter() {
                 <Route path={ROUTES.usuarios} element={<UsuariosPage />} />
                 <Route path={ROUTES.configuracoes} element={<ConfiguracoesPage />} />
                 <Route path={ROUTES.perfil} element={<PerfilPage />} />
+                <Route path={ROUTES.rastreabilidade} element={<RastreabilidadePage />} />
               </Route>
             </Route>
 

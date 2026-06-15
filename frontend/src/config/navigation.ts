@@ -8,6 +8,7 @@ import {
   Users,
   Settings,
   Target,
+  History,
   type LucideIcon,
 } from "lucide-react";
 import { ROUTES } from "./routes";
@@ -84,6 +85,12 @@ export const NAV_SECTIONS: NavSection[] = [
         to: ROUTES.usuarios,
         icon: Users,
         description: "Gestão de usuários e permissões",
+      },
+      {
+        label: "Rastreabilidade",
+        to: ROUTES.rastreabilidade,
+        icon: History,
+        description: "Histórico e auditoria de ações do sistema",
       },
       {
         label: "Configurações",

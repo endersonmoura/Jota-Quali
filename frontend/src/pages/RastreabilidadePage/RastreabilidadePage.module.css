@@ -1,0 +1,99 @@
+.section {
+  background: var(--jq-surface);
+  border: 1px solid var(--jq-border);
+  border-radius: var(--jq-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--jq-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow: hidden;
+}
+
+.loadingState {
+  padding: 3rem;
+  text-align: center;
+  color: var(--jq-text-muted);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid var(--jq-border);
+  border-radius: var(--jq-radius-md);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.table th {
+  background: var(--jq-surface-hover);
+  color: var(--jq-text-muted);
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--jq-border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--jq-border);
+  color: var(--jq-text);
+  vertical-align: top;
+}
+
+.table tbody tr:hover {
+  background: var(--jq-surface-hover);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dateCell {
+  white-space: nowrap;
+  color: var(--jq-text-muted);
+}
+
+.detailsCell {
+  min-width: 250px;
+  max-width: 400px;
+  line-height: 1.4;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge_criar {
+  background: var(--jq-success-bg);
+  color: var(--jq-success);
+}
+
+.badge_editar {
+  background: var(--jq-info-bg);
+  color: var(--jq-info);
+}
+
+.badge_inativar {
+  background: var(--jq-danger-bg);
+  color: var(--jq-danger);
+}
+
+.badge_calibrar {
+  background: var(--jq-warn-bg);
+  color: var(--jq-warn);
+}
+
+.badge_aprovar {
+  background: var(--jq-success-bg);
+  color: var(--jq-success);
+}

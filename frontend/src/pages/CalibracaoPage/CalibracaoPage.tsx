@@ -12,10 +12,13 @@ import { EquipamentoFormDialog } from "@/features/equipamentos/components/Equipa
 import { ConfirmDialog } from "@/features/equipamentos/components/ConfirmDialog/ConfirmDialog";
 import type { Equipamento, EquipamentoInput } from "@/features/equipamentos/types";
 import { CalibracaoActionDialog } from "@/features/equipamentos/components/CalibracaoActionDialog/CalibracaoActionDialog";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import jsPDF from "jspdf";
 import styles from "../EquipamentosPage/EquipamentosPage.module.css";
 
 export default function CalibracaoPage() {
   useDocumentTitle("Calibração");
+  const { user } = useAuth();
 
   const filterFn = useCallback((eq: Equipamento) => {
     return eq.status !== "ativo";
@@ -81,7 +84,7 @@ export default function CalibracaoPage() {
     }
   }
 
-  function handleSelectCalibrationOption(option: "laboratorio" | "campo") {
+  function handleSelectCalibrationOption(option: "laboratorio" | "campo", cpf: string) {
     if (!toCalibrate) return;
     const tipo = option === "laboratorio" ? "laboratório" : "campo";
     try {
@@ -95,6 +98,30 @@ export default function CalibracaoPage() {
         laudoAssinado: toCalibrate.laudoAssinado,
         tipoCalibracao: option,
       });
+
+      // Geração do PDF
+      const doc = new jsPDF();
+      const dataAtual = new Date().toLocaleDateString("pt-BR");
+      
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Termo de Início de Calibração", 105, 20, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      
+      const nomeUsuario = user ? user.name : "Usuário Desconhecido";
+      
+      const texto = `Eu, ${nomeUsuario}, portador(a) do CPF ${cpf}, estou iniciando a calibração do equipamento ${toCalibrate.tag} - ${toCalibrate.nome}, no dia ${dataAtual}.`;
+      
+      const linhasTexto = doc.splitTextToSize(texto, 170);
+      doc.text(linhasTexto, 20, 40);
+
+      doc.setFont("helvetica", "italic");
+      doc.text("Documento gerado automaticamente pelo sistema Jota-Quali.", 105, 280, { align: "center" });
+
+      doc.save(`Termo_Calibracao_${toCalibrate.tag}.pdf`);
+
       toast.success(`Iniciando calibração em ${tipo} para ${toCalibrate.tag}...`);
     } catch (err) {
       toast.error("Erro ao registrar a calibração.");

@@ -21,7 +21,15 @@ export function useEquipamentos(baseFilter?: (eq: Equipamento) => boolean) {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    setItems(equipamentosService.list());
+    let mounted = true;
+    equipamentosService.list()
+      .then((data) => {
+        if (mounted) setItems(data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch equipamentos", err);
+      });
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
@@ -73,20 +81,20 @@ export function useEquipamentos(baseFilter?: (eq: Equipamento) => boolean) {
     return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, currentPage]);
 
-  const create = useCallback((input: EquipamentoInput) => {
-    const novo = equipamentosService.create(input);
+  const create = useCallback(async (input: EquipamentoInput) => {
+    const novo = await equipamentosService.create(input);
     setItems((prev) => [novo, ...prev]);
     return novo;
   }, []);
 
-  const update = useCallback((id: string, input: EquipamentoInput) => {
-    const atualizado = equipamentosService.update(id, input);
+  const update = useCallback(async (id: string, input: EquipamentoInput) => {
+    const atualizado = await equipamentosService.update(id, input);
     setItems((prev) => prev.map((e) => (e.id === id ? atualizado : e)));
     return atualizado;
   }, []);
 
-  const remove = useCallback((id: string) => {
-    equipamentosService.remove(id);
+  const remove = useCallback(async (id: string) => {
+    await equipamentosService.remove(id);
     setItems((prev) => prev.filter((e) => e.id !== id));
   }, []);
 

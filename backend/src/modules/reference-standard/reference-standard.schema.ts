@@ -2,8 +2,8 @@ import { z } from "zod";
 
 export const createReferenceStandardSchema = z.object({
   body: z.object({
-    codigo: z.string({ required_error: "O código é obrigatório." }).min(1, "O código não pode ser vazio."),
-    descricao: z.string({ required_error: "A descrição é obrigatória." }).min(1, "A descrição não pode ser vazia."),
+    codigo: z.string().min(1, "O código não pode ser vazio."),
+    descricao: z.string().min(1, "A descrição não pode ser vazia."),
     tipo: z.string().optional(),
     validade: z.coerce.date().optional(),
   }),

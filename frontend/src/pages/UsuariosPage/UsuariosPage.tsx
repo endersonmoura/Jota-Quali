@@ -27,7 +27,13 @@ export default function UsuariosPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setUsers(authService.listUsers());
+    let mounted = true;
+    authService.listUsers().then((data) => {
+      if (mounted) setUsers(data);
+    }).catch((err) => {
+      toast.error("Erro ao carregar usuários.");
+    });
+    return () => { mounted = false; };
   }, []);
 
   const handleEdit = (u: AuthUser) => {
@@ -41,7 +47,8 @@ export default function UsuariosPage() {
     setLoading(true);
     try {
       await authService.updateUserRole(editingUser.id, selectedRole);
-      setUsers(authService.listUsers());
+      const updatedUsers = await authService.listUsers();
+      setUsers(updatedUsers);
       toast.success(`Cargo de ${editingUser.name} atualizado com sucesso.`);
       setEditingUser(null);
     } catch (err) {

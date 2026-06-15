@@ -61,10 +61,10 @@ export default function EquipamentosPage() {
   async function handleSubmit(input: EquipamentoInput) {
     try {
       if (editing) {
-        update(editing.id, input);
+        await update(editing.id, input);
         toast.success("Equipamento atualizado com sucesso.");
       } else {
-        create(input);
+        await create(input);
         toast.success("Equipamento cadastrado com sucesso.");
       }
       setFormOpen(false);
@@ -76,10 +76,10 @@ export default function EquipamentosPage() {
     }
   }
 
-  function handleConfirmDelete() {
+  async function handleConfirmDelete() {
     if (!toDelete) return;
     try {
-      remove(toDelete.id);
+      await remove(toDelete.id);
       toast.success(`Equipamento ${toDelete.tag} removido.`);
     } catch (err) {
       const msg =

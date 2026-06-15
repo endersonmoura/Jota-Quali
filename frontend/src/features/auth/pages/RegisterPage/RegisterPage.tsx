@@ -109,7 +109,7 @@ export default function RegisterPage() {
     try {
       await register({ name, email, password, gender: gender as "masculino" | "feminino" });
       setSuccess(true);
-      setTimeout(() => navigate(ROUTES.dashboard, { replace: true }), 1200);
+      setTimeout(() => navigate(ROUTES.login, { replace: true }), 2000);
     } catch (err) {
       setFormError(
         err instanceof Error ? err.message : "Não foi possível criar sua conta."
@@ -123,12 +123,11 @@ export default function RegisterPage() {
     return (
       <AuthLayout
         title="Conta criada com sucesso"
-        subtitle="Estamos preparando seu ambiente."
+        subtitle="Aguarde o redirecionamento."
       >
         <div className={s.form}>
           <Alert variant="success" title="Bem-vindo(a) ao JotaQuali">
-            Sua conta foi criada. Você será redirecionado para o painel em
-            instantes.
+            Sua conta foi criada com sucesso! Você será redirecionado para a tela de login em instantes.
           </Alert>
         </div>
       </AuthLayout>
