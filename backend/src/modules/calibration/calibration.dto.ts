@@ -11,4 +11,6 @@ export interface RegistrarCalibracaoInternaDTO {
   dataCalibracao: Date;
   validade: Date;
   calibradorId: number;
+  cpfResponsavel: string;
+  tipoLocal: "laboratorio" | "campo";
 }

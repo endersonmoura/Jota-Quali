@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Gauge, Wrench, CalendarClock } from "lucide-react";
+import { Gauge, Wrench, CalendarClock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/PageHeader/PageHeader";
 import { EmptyState } from "@/components/feedback/EmptyState/EmptyState";
@@ -12,13 +12,17 @@ import { EquipamentoFormDialog } from "@/features/equipamentos/components/Equipa
 import { ConfirmDialog } from "@/features/equipamentos/components/ConfirmDialog/ConfirmDialog";
 import type { Equipamento, EquipamentoInput } from "@/features/equipamentos/types";
 import { CalibracaoActionDialog } from "@/features/equipamentos/components/CalibracaoActionDialog/CalibracaoActionDialog";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { calibracaoService } from "@/features/calibracoes/services/calibracaoService";
+import jsPDF from "jspdf";
 import styles from "../EquipamentosPage/EquipamentosPage.module.css";
 
 export default function CalibracaoPage() {
   useDocumentTitle("Calibração");
+  const { user } = useAuth();
 
   const filterFn = useCallback((eq: Equipamento) => {
-    return eq.status !== "ativo";
+    return eq.status !== "inativo";
   }, []);
 
   const {
@@ -38,6 +42,7 @@ export default function CalibracaoPage() {
     toggleSort,
     update,
     remove,
+    isLoading,
   } = useEquipamentos(filterFn);
 
   const [formOpen, setFormOpen] = useState(false);
@@ -72,7 +77,7 @@ export default function CalibracaoPage() {
     if (!toDelete) return;
     try {
       remove(toDelete.id);
-      toast.success(`Equipamento ${toDelete.tag} removido.`);
+      toast.success(`Equipamento ${toDelete.codigo} removido.`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro ao remover equipamento.";
       toast.error(msg);
@@ -81,23 +86,59 @@ export default function CalibracaoPage() {
     }
   }
 
-  function handleSelectCalibrationOption(option: "laboratorio" | "campo") {
+  async function handleSelectCalibrationOption(
+    option: "laboratorio" | "campo", 
+    cpf: string,
+    padraoId: number,
+    validade: string,
+    padraoText?: string
+  ) {
     if (!toCalibrate) return;
-    const tipo = option === "laboratorio" ? "laboratório" : "campo";
     try {
-      update(toCalibrate.id, {
-        nome: toCalibrate.nome,
-        tag: toCalibrate.tag,
-        status: "calibracao",
-        localizacao: toCalibrate.localizacao,
-        ultimaCalibracao: toCalibrate.ultimaCalibracao,
-        padrao: toCalibrate.padrao,
-        laudoAssinado: toCalibrate.laudoAssinado,
-        tipoCalibracao: option,
+      // 1. Chama a API do backend
+      await calibracaoService.registrarInterna({
+        equipamentoId: toCalibrate.id,
+        equipamentoReferenciaId: padraoId,
+        dataCalibracao: new Date().toISOString(),
+        validade: new Date(`${validade}T00:00:00`).toISOString(),
+        cpfResponsavel: cpf.replace(/\D/g, ''),
+        tipoLocal: option,
       });
-      toast.success(`Iniciando calibração em ${tipo} para ${toCalibrate.tag}...`);
+
+      // 2. Geração do PDF Fake para demonstração no front (mantida a pedido)
+      const doc = new jsPDF();
+      const dataAtual = new Date().toLocaleDateString("pt-BR");
+      
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Termo de Início de Calibração", 105, 20, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      
+      const nomeUsuario = user ? user.name : "Usuário Desconhecido";
+      
+      const texto = `Eu, ${nomeUsuario}, portador(a) do CPF ${cpf}, estou iniciando a calibração do equipamento ${toCalibrate.codigo} - ${toCalibrate.descricao}, no dia ${dataAtual}. Padrão de Referência utilizado: ${padraoText || padraoId}.`;
+      
+      const linhasTexto = doc.splitTextToSize(texto, 170);
+      doc.text(linhasTexto, 20, 40);
+
+      doc.setFont("helvetica", "italic");
+      doc.text("Documento gerado automaticamente pelo sistema Jota-Quali.", 105, 280, { align: "center" });
+
+      doc.save(`Termo_Calibracao_${toCalibrate.codigo}.pdf`);
+
+      toast.success(`Calibração registrada com sucesso! Equipamento atualizado.`);
+      
+      // Atualiza o estado local para sumir da lista ou mostrar o status correto
+      update(toCalibrate.id, {
+        ...toCalibrate,
+        status: "ativo",
+        dataUltimaCalibracao: new Date().toISOString()
+      } as any);
+
     } catch (err) {
-      toast.error("Erro ao registrar a calibração.");
+      toast.error(err instanceof Error ? err.message : "Erro ao registrar a calibração.");
     } finally {
       setToCalibrate(null);
     }
@@ -111,7 +152,12 @@ export default function CalibracaoPage() {
         subtitle="Gerencie equipamentos em manutenção, inativos ou próximos do vencimento da calibração."
       />
 
-      {!hasAnyItems && !isFiltering ? (
+      {isLoading ? (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "4rem", gap: "0.5rem" }}>
+          <Loader2 className="animate-spin" size={24} style={{ color: "var(--jq-primary)" }} />
+          <span style={{ color: "var(--jq-text-light)" }}>Carregando calibrações pendentes...</span>
+        </div>
+      ) : !hasAnyItems && !isFiltering ? (
         <EmptyState
           icon={CalendarClock}
           title="Nenhum equipamento pendente"
@@ -179,7 +225,7 @@ export default function CalibracaoPage() {
         title="Excluir equipamento"
         message={
           toDelete
-            ? `Tem certeza que deseja excluir o equipamento "${toDelete.tag} — ${toDelete.nome}"? Essa ação não poderá ser desfeita.`
+            ? `Tem certeza que deseja excluir o equipamento "${toDelete.codigo} — ${toDelete.descricao}"? Essa ação não poderá ser desfeita.`
             : ""
         }
         confirmLabel="Excluir"

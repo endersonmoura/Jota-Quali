@@ -2,13 +2,13 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button/Button";
 import { Field } from "@/components/ui/Field/Field";
 import { Modal } from "../Modal/Modal";
-import { storage } from "@/lib/storage";
 import {
   STATUS_LABEL,
   type Equipamento,
   type EquipamentoInput,
   type StatusEquipamento,
 } from "../../types";
+import { obraService, type ObraDTO } from "@/services/obra/obra.service";
 import styles from "./EquipamentoFormDialog.module.css";
 
 interface Props {
@@ -19,10 +19,13 @@ interface Props {
 }
 
 const EMPTY: EquipamentoInput = {
-  tag: "",
-  nome: "",
-  ultimaCalibracao: null,
-  localizacao: "",
+  codigo: "",
+  descricao: "",
+  tipo: "",
+  dataUltimaCalibracao: null,
+  dataVencimentoCalibracao: null,
+  obraId: undefined,
+  situacaoDocumental: "regular",
   status: "ativo",
 };
 
@@ -33,41 +36,45 @@ export function EquipamentoFormDialog({ open, initial, onClose, onSubmit }: Prop
   const [form, setForm] = useState<EquipamentoInput>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
-  const [padroes, setPadroes] = useState<{ id: string; nome: string; codigo: string }[]>([]);
+  const [obras, setObras] = useState<ObraDTO[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    obraService.list("ativa").then((data) => {
+      if (mounted) setObras(data);
+    }).catch(console.error);
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     if (!open) return;
-    setPadroes(storage.get<{ id: string; nome: string; codigo: string }[]>("jq:padroes:v1") || []);
     setErrors({});
     setForm(
       initial
         ? {
-            tag: initial.tag,
-            nome: initial.nome,
-            ultimaCalibracao: initial.ultimaCalibracao,
-            localizacao: initial.localizacao,
+            codigo: initial.codigo,
+            descricao: initial.descricao,
+            tipo: initial.tipo || "",
+            dataUltimaCalibracao: initial.dataUltimaCalibracao,
+            dataVencimentoCalibracao: initial.dataVencimentoCalibracao,
+            obraId: initial.obraId,
             status: initial.status,
-            padrao: initial.padrao || "",
+            situacaoDocumental: initial.situacaoDocumental || "regular",
           }
-        : { ...EMPTY, padrao: "" }
+        : { ...EMPTY }
     );
   }, [open, initial]);
 
   function validate(input: EquipamentoInput): Errors {
     const e: Errors = {};
-    if (!input.tag.trim()) e.tag = "Informe a tag do equipamento.";
-    else if (input.tag.trim().length > 30) e.tag = "Máximo de 30 caracteres.";
-    if (!input.nome.trim()) e.nome = "Informe o nome do equipamento.";
-    else if (input.nome.trim().length > 120) e.nome = "Máximo de 120 caracteres.";
-    if (input.ultimaCalibracao) {
-      const d = new Date(input.ultimaCalibracao);
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-      if (Number.isNaN(d.getTime())) e.ultimaCalibracao = "Data inválida.";
-      else if (d > today) e.ultimaCalibracao = "Não pode ser uma data futura.";
+    if (!input.codigo?.trim()) e.codigo = "Informe o código do equipamento.";
+    if (!input.descricao?.trim()) e.descricao = "Informe a descrição.";
+    if (!input.tipo?.trim()) e.tipo = "Informe o tipo do equipamento.";
+
+    if (input.dataUltimaCalibracao) {
+      const d = new Date(input.dataUltimaCalibracao);
+      if (Number.isNaN(d.getTime())) e.dataUltimaCalibracao = "Data inválida.";
     }
-    if (input.localizacao.length > 80) e.localizacao = "Máximo de 80 caracteres.";
-    if (!input.padrao?.trim()) e.padrao = "Selecione um padrão.";
     return e;
   }
 
@@ -113,12 +120,12 @@ export function EquipamentoFormDialog({ open, initial, onClose, onSubmit }: Prop
       <form id="equipamento-form" onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.grid}>
           <Field
-            label="Tag"
+            label="Código / Tag"
             required
             placeholder="Ex.: EQ-001"
-            value={form.tag}
-            onChange={(e) => setForm({ ...form, tag: e.target.value })}
-            error={errors.tag}
+            value={form.codigo}
+            onChange={(e) => setForm({ ...form, codigo: e.target.value })}
+            error={errors.codigo}
             autoFocus
           />
           <div className={styles.selectField}>
@@ -141,50 +148,89 @@ export function EquipamentoFormDialog({ open, initial, onClose, onSubmit }: Prop
         </div>
 
         <Field
-          label="Nome do equipamento"
+          label="Descrição do equipamento"
           required
           placeholder="Ex.: Balança analítica Shimadzu AY220"
-          value={form.nome}
-          onChange={(e) => setForm({ ...form, nome: e.target.value })}
-          error={errors.nome}
+          value={form.descricao}
+          onChange={(e) => setForm({ ...form, descricao: e.target.value })}
+          error={errors.descricao}
         />
+
+        <div className={styles.grid}>
+          <Field
+            label="Tipo *"
+            required
+            placeholder="Ex.: Balança"
+            value={form.tipo}
+            onChange={(e) => setForm({ ...form, tipo: e.target.value })}
+            error={errors.tipo}
+          />
+          <div className={styles.selectField}>
+            <label className={styles.selectLabel} htmlFor="eq-sit-doc">
+              Situação Documental
+            </label>
+            <select
+              id="eq-sit-doc"
+              className={styles.select}
+              value={form.situacaoDocumental}
+              onChange={(e) =>
+                setForm({ ...form, situacaoDocumental: e.target.value })
+              }
+            >
+              <option value="regular">Regular</option>
+              <option value="irregular">Irregular</option>
+              <option value="aguardando_assinatura">Aguardando Assinatura</option>
+            </select>
+          </div>
+        </div>
+
+        <div className={styles.grid}>
+          <div className={styles.selectField} style={{ gridColumn: "span 2" }}>
+            <label className={styles.selectLabel} htmlFor="eq-obra">
+              Obra
+            </label>
+            <select
+              id="eq-obra"
+              className={styles.select}
+              value={form.obraId || ""}
+              onChange={(e) =>
+                setForm({ ...form, obraId: e.target.value ? Number(e.target.value) : undefined })
+              }
+            >
+              <option value="">Selecione uma obra (opcional)</option>
+              {obras.map((obra) => (
+                <option key={obra.id} value={obra.id}>
+                  {obra.nomeObra}
+                </option>
+              ))}
+            </select>
+            <span style={{ fontSize: "0.75rem", color: "var(--jq-text-muted)", marginTop: "0.25rem" }}>
+              Opcional. Vincule este equipamento a uma obra específica.
+            </span>
+          </div>
+        </div>
 
         <div className={styles.grid}>
           <Field
             label="Última calibração"
             type="date"
-            value={form.ultimaCalibracao ?? ""}
+            value={form.dataUltimaCalibracao ?? ""}
             onChange={(e) =>
-              setForm({ ...form, ultimaCalibracao: e.target.value || null })
+              setForm({ ...form, dataUltimaCalibracao: e.target.value || null })
             }
-            error={errors.ultimaCalibracao}
+            error={errors.dataUltimaCalibracao}
             hint="Opcional"
           />
           <Field
-            label="Localização"
-            placeholder="Ex.: Laboratório 1"
-            value={form.localizacao}
-            onChange={(e) => setForm({ ...form, localizacao: e.target.value })}
-            error={errors.localizacao}
+            label="Vencimento calibração"
+            type="date"
+            value={form.dataVencimentoCalibracao ?? ""}
+            onChange={(e) =>
+              setForm({ ...form, dataVencimentoCalibracao: e.target.value || null })
+            }
+            error={errors.dataVencimentoCalibracao}
             hint="Opcional"
           />
-          <div className={styles.selectField}>
-            <label className={styles.selectLabel} htmlFor="eq-padrao">
-              Padrão<span className={styles.required}>*</span>
-            </label>
-            <select
-              id="eq-padrao"
-              className={styles.select}
-              value={form.padrao || ""}
-              onChange={(e) => setForm({ ...form, padrao: e.target.value })}
-              required
-            >
-              <option value="" disabled>Selecione um padrão</option>
-              {padroes.map(p => (
-                <option key={p.id} value={p.nome}>{p.codigo} - {p.nome}</option>
-              ))}
-            </select>
-          </div>
         </div>
       </form>
     </Modal>

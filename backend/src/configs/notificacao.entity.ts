@@ -17,4 +17,7 @@ export class Notificacao {
 
   @Property({ fieldName: "data_hora", type: "datetime2" })
   dataHora: Date = new Date();
+
+  @Property({ type: "boolean", default: false })
+  lida: boolean = false;
 }

@@ -27,4 +27,11 @@ calibrationRoutes.post(
   controller.registrarCalibracaoInterna,
 );
 
+// GET /api/calibracoes/equipamento/:equipamentoId/ultima
+calibrationRoutes.get(
+  "/equipamento/:equipamentoId/ultima",
+  ensureAuthenticated,
+  controller.getUltimaCalibracao,
+);
+
 export default calibrationRoutes;

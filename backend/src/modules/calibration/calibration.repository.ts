@@ -66,10 +66,11 @@ export class CalibrationRepository {
     const calibracao = em.create(Calibracao, {
       equipamento: data.equipamentoId,
       padraoReferencia: data.equipamentoReferenciaId,
-      tipo: "interna",
+      tipo: data.tipoLocal === "laboratorio" ? "interna" : "externa", // Map the local to tipo to avoid varchar(10) overflow
       dataRealizacao: data.dataCalibracao,
       dataValidade: data.validade,
       usuario: data.calibradorId,
+      cpfResponsavel: data.cpfResponsavel,
       status: "pendente_documento",
       criadoEm: new Date(),
       atualizadoEm: new Date(),
@@ -97,5 +98,30 @@ export class CalibrationRepository {
     em.persist(documento);
     await em.flush();
     return documento.id;
+  }
+
+  public async updateEquipamentoAfterCalibration(
+    equipamentoId: number,
+    dataCalibracao: Date,
+  ): Promise<void> {
+    const em = this.em;
+    const equipamento = await em.findOne("Equipamento", { id: equipamentoId });
+    if (equipamento) {
+      equipamento.dataUltimaCalibracao = dataCalibracao;
+      equipamento.status = "ativo";
+      await em.flush();
+    }
+  }
+
+  public async getUltimaCalibracao(equipamentoId: number): Promise<Calibracao | null> {
+    const em = this.em;
+    return em.findOne(
+      Calibracao,
+      { equipamento: equipamentoId, tipo: "interna" },
+      {
+        orderBy: { dataRealizacao: 'DESC' },
+        populate: ["padraoReferencia"],
+      }
+    );
   }
 }

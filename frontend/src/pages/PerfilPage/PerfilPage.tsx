@@ -18,20 +18,36 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function PerfilPage() {
   useDocumentTitle("Meu Perfil");
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
-  const [gender, setGender] = useState(user?.gender ?? "");
+  const [cpf, setCpf] = useState(user?.cpf ?? "");
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Implementação mockada apenas para visual/UI
-    toast.success("Perfil atualizado com sucesso.");
+    if (!user) return;
+    try {
+      toast.loading("Salvando perfil...", { id: "save-profile" });
+      const { api } = await import("@/services/api");
+      const res = await api.patch(`/usuarios/${user.id}/profile`, {
+        name,
+        email,
+        cpf,
+      });
+      if (res.data.success) {
+        // Obter auth context methods? I need to use the `useAuth` hook.
+        // I will do it here.
+        updateUser({ name, email, cpf });
+        toast.success("Perfil atualizado com sucesso.", { id: "save-profile" });
+      }
+    } catch (error) {
+      toast.error("Erro ao atualizar perfil.", { id: "save-profile" });
+    }
   };
 
   const handleSavePassword = (e: React.FormEvent) => {
@@ -61,20 +77,24 @@ export default function PerfilPage() {
           <CardBody>
             <div className={styles.avatarSection}>
               <div className={styles.avatar}>
-                {user?.avatarInitials ?? "JQ"}
+                {user?.name
+                  ? user.name
+                      .split(" ")
+                      .slice(0, 2)
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                  : "JQ"}
               </div>
               <div className={styles.avatarInfo}>
                 <div className={styles.avatarDetails}>
                   <span className={styles.avatarName}>{user?.name ?? "Usuário"}</span>
                   <span className={styles.avatarRole}>{user?.role ? ROLE_LABELS[user.role] : "Consulta"}</span>
                 </div>
-                <button type="button" className={styles.editPhotoBtn}>
-                  <Camera size={16} />
-                  <span>Editar foto</span>
-                </button>
               </div>
             </div>
-
+          </CardBody>
+          <CardBody>
             <form onSubmit={handleSaveProfile} className={styles.formGrid}>
               <div className={styles.formRow}>
                 <Field
@@ -92,21 +112,12 @@ export default function PerfilPage() {
                 />
               </div>
               <div className={styles.formRow}>
-                <div className={styles.selectField}>
-                  <label className={styles.selectLabel} htmlFor="profile-gender">
-                    Gênero
-                  </label>
-                  <select
-                    id="profile-gender"
-                    className={styles.select}
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value)}
-                  >
-                    <option value="">Não informar</option>
-                    <option value="masculino">Masculino</option>
-                    <option value="feminino">Feminino</option>
-                  </select>
-                </div>
+                <Field
+                  label="CPF"
+                  value={cpf}
+                  onChange={(e) => setCpf(e.target.value)}
+                  required
+                />
                 <Field
                   label="Função/Cargo"
                   value={user?.role ? ROLE_LABELS[user.role] : ""}

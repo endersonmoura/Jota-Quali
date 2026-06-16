@@ -13,10 +13,12 @@ const controller = new ReferenceStandardController();
 // Todas as rotas de Padrões de Referência exigem autenticação
 referenceStandardRoutes.use(ensureAuthenticated);
 
-referenceStandardRoutes.post("/", validateRequest(createReferenceStandardSchema), controller.create);
+import { ensureRole } from "../../middlewares/ensureRole";
+
+referenceStandardRoutes.post("/", ensureRole(["Administrador", "Calibrador"]), validateRequest(createReferenceStandardSchema), controller.create);
 referenceStandardRoutes.get("/", controller.getAll);
 referenceStandardRoutes.get("/:id", controller.getById);
-referenceStandardRoutes.put("/:id", validateRequest(updateReferenceStandardSchema), controller.update);
-referenceStandardRoutes.delete("/:id", controller.delete);
+referenceStandardRoutes.put("/:id", ensureRole(["Administrador", "Calibrador"]), validateRequest(updateReferenceStandardSchema), controller.update);
+referenceStandardRoutes.delete("/:id", ensureRole(["Administrador", "Calibrador"]), controller.delete);
 
 export { referenceStandardRoutes };

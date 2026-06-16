@@ -7,6 +7,16 @@ export class DocumentService {
   private repository = new DocumentRepository();
   private auditService = new AuditService();
 
+  public async listarDocumentos() {
+    return await this.repository.findAll();
+  }
+
+  public async getDocumentoById(id: number) {
+    const doc = await this.repository.getDocumentoById(id);
+    if (!doc) throw new AppError("Documento não encontrado.", 404);
+    return doc;
+  }
+
   public async uploadLaudo(data: UploadLaudoDTO): Promise<number> {
     // RN01: O laudo entra "pendente_assinatura".
     const documentoId = await this.repository.createLaudo(data);
@@ -20,7 +30,7 @@ export class DocumentService {
     await this.repository.atualizarStatusEquipamento(data.equipamentoId, "pendente_assinatura");
 
     this.auditService.log({
-      userId: 1, // Temporario, idealmente injetado
+      userId: 1,
       action: "UPLOAD_LAUDO",
       resource: "documento",
       resourceId: documentoId,
@@ -49,6 +59,20 @@ export class DocumentService {
       action: "ASSINAR_DOCUMENTO",
       resource: "documento",
       resourceId: data.documentoId,
+    });
+  }
+
+  public async excluirDocumento(id: number, userId: number): Promise<void> {
+    const doc = await this.repository.getDocumentoById(id);
+    if (!doc) throw new AppError("Documento não encontrado.", 404);
+
+    await this.repository.deleteDocumento(id);
+
+    this.auditService.log({
+      userId,
+      action: "EXCLUIR_DOCUMENTO",
+      resource: "documento",
+      resourceId: id,
     });
   }
 }

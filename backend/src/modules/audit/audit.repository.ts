@@ -24,10 +24,18 @@ export class AuditRepository {
     await em.flush();
   }
 
-  public async findLogsByResource(resourceId?: number): Promise<AuditLog[]> {
+  public async findLogsByResource(resourceId?: number): Promise<any[]> {
     const em = this.em;
-    const query = resourceId ? { entidadeId: resourceId } : {};
-    return em.find(AuditLog, query, { orderBy: { dataHora: "DESC" } });
+    const qb = em.createQueryBuilder(AuditLog, 'a');
+    qb.select(['a.*', 'u.nome as usuarioNome'])
+      .leftJoin('a.usuario', 'u')
+      .orderBy({ dataHora: "DESC" });
+    
+    if (resourceId) {
+      qb.where({ entidadeId: resourceId });
+    }
+    
+    return qb.execute();
   }
 
 

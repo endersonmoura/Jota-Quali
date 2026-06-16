@@ -46,4 +46,18 @@ export class CalibrationController {
       next(error);
     }
   };
+
+  public getUltimaCalibracao = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { equipamentoId } = req.params;
+      const data = await this.service.getUltimaCalibracao(Number(equipamentoId));
+      res.status(200).json({ success: true, data });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

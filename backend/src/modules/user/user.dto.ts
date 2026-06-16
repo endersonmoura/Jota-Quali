@@ -4,6 +4,8 @@ export interface UserResponseDTO {
   email: string;
   role: string;
   status: string;
+  cpf?: string;
+  avatarUrl?: string;
   createdAt: Date;
 }
 

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronRight, Pencil, Trash2, CheckCircle2, XCircle, X, Wrench, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import type { Equipamento } from "../../types";
 import { StatusBadge } from "../StatusBadge/StatusBadge";
 import styles from "./EquipamentosTable.module.css";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/Button/Button";
+import { calibracaoService } from "@/features/calibracoes/services/calibracaoService";
 
 import type { SortField, SortDirection } from "../../hooks/useEquipamentos";
 
@@ -22,14 +23,92 @@ interface Props {
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
-  const [y, m, d] = iso.split("-");
+  const datePart = iso.split("T")[0];
+  if (!datePart) return "—";
+  const [y, m, d] = datePart.split("-");
   if (!y || !m || !d) return "—";
   return `${d}/${m}/${y}`;
 }
 
+function ExpandedEquipamentoDetails({ eq, setPopup }: { eq: Equipamento, setPopup: any }) {
+  const [padrao, setPadrao] = useState<string>("Carregando...");
+
+  useEffect(() => {
+    let mounted = true;
+    calibracaoService.getUltima(eq.id).then((cal) => {
+      if (!mounted) return;
+      if (cal && cal.padraoReferencia) {
+        setPadrao(`${cal.padraoReferencia.codigo} - ${cal.padraoReferencia.descricao}`);
+      } else {
+        setPadrao("Não definido");
+      }
+    }).catch(() => {
+      if (mounted) setPadrao("Erro ao carregar");
+    });
+    return () => { mounted = false; };
+  }, [eq.id]);
+
+  return (
+    <div className={styles.expandedContent}>
+      <div className={styles.expandedHeader}>
+        Detalhes do Equipamento: {eq.codigo}
+      </div>
+      <div className={styles.expandedGrid}>
+        <div 
+          className={cn(styles.expandedItem, styles.clickableCard)}
+          onClick={() => {
+            setPopup({
+              isOpen: true,
+              type: 'padrao',
+              title: 'Padrão do Equipamento',
+              content: `O equipamento está calibrado com o seguinte padrão: ${padrao}`,
+              hasFile: false
+            });
+          }}
+        >
+          <span className={styles.expandedLabel}>Padrão do Equipamento</span>
+          <span className={styles.expandedValue}>{padrao}</span>
+        </div>
+                        <div 
+                          className={cn(styles.expandedItem, styles.clickableCard)}
+                          onClick={() => {
+                            setPopup({
+                              isOpen: true,
+                              type: 'laudo',
+                              title: 'Laudo Assinado',
+                              content: eq.situacaoDocumental === "regular" || eq.situacaoDocumental === "assinado" ? 'O equipamento possui laudo assinado.' : 'Não há laudo assinado para este equipamento.',
+                              hasFile: !!(eq as any).pathArquivo,
+                              fileUrl: (eq as any).pathArquivo,
+                            });
+                          }}
+                        >
+                          <span className={styles.expandedLabel}>Laudo Assinado</span>
+                          <span className={styles.expandedValue} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            {eq.situacaoDocumental === "regular" || eq.situacaoDocumental === "assinado" ? (
+                              <><CheckCircle2 size={16} color="var(--jq-success)" /> Sim</>
+                            ) : (
+                              <><XCircle size={16} color="var(--jq-danger)" /> Não</>
+                            )}
+                          </span>
+                        </div>
+        <div className={styles.expandedItem}>
+          <span className={styles.expandedLabel}>Tipo de Calibração</span>
+          <span className={styles.expandedValue}>
+            {eq.tipo}
+          </span>
+        </div>
+        <div className={styles.expandedItem}>
+          <span className={styles.expandedLabel}>Data de Cadastro</span>
+          <span className={styles.expandedValue}>{formatDate(eq.criadoEm ? eq.criadoEm.split('T')[0] : null)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign, mode = "equipamentos", sortField, sortDirection, onSort }: Props) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  const [popup, setPopup] = useState<{ isOpen: boolean; type: 'padrao' | 'laudo'; title: string; content: string; hasFile: boolean } | null>(null);
+  const [popup, setPopup] = useState<{ isOpen: boolean; type: 'padrao' | 'laudo'; title: string; content: string; hasFile: boolean; fileUrl?: string } | null>(null);
 
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);
@@ -65,10 +144,10 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign
         <thead>
           <tr>
             <th style={{ width: "40px" }} aria-label="Expandir"></th>
-            {renderSortHeader("Tag", "tag")}
-            {renderSortHeader("Nome", "nome")}
-            {renderSortHeader("Última calibração", "ultimaCalibracao")}
-            {renderSortHeader("Localização", "localizacao")}
+            {renderSortHeader("Código / Tag", "codigo")}
+            {renderSortHeader("Descrição", "descricao")}
+            {renderSortHeader("Última calibração", "dataUltimaCalibracao")}
+            <th className={styles.sortableHeader}>Obra</th>
             {mode === "laudos" ? (
               <th className={styles.sortableHeader}>Status do Laudo</th>
             ) : (
@@ -79,40 +158,40 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign
         </thead>
         <tbody>
           {items.map((eq) => {
-            const isExpanded = expandedRows.has(eq.id);
+            const isExpanded = expandedRows.has(String(eq.id));
             return (
               <React.Fragment key={eq.id}>
                 <tr
                   className={styles.clickableRow}
                   onClick={(e) => {
                     if ((e.target as HTMLElement).closest('button')) return;
-                    toggleRow(eq.id);
+                    toggleRow(String(eq.id));
                   }}
                 >
                   <td>
                     <button
                       type="button"
                       className={cn(styles.expandBtn, isExpanded && styles.expanded)}
-                      onClick={() => toggleRow(eq.id)}
+                      onClick={() => toggleRow(String(eq.id))}
                       aria-label={isExpanded ? "Recolher detalhes" : "Expandir detalhes"}
                       tabIndex={-1}
                     >
                       <ChevronRight size={18} />
                     </button>
                   </td>
-                  <td className={styles.tag}>{eq.tag}</td>
-                  <td className={styles.nome}>{eq.nome}</td>
-                  <td>{formatDate(eq.ultimaCalibracao)}</td>
-                  <td>{eq.localizacao || "—"}</td>
+                  <td className={styles.tag}>{eq.codigo}</td>
+                  <td className={styles.nome}>{eq.descricao}</td>
+                  <td>{formatDate(eq.dataUltimaCalibracao ?? null)}</td>
+                  <td>{eq.obraId ? `Obra ${eq.obraId}` : "—"}</td>
                   <td>
                     {mode === "laudos" ? (
-                      eq.statusLaudo === "aguardando_assinatura" ? (
+                      eq.situacaoDocumental === "aguardando_assinatura" ? (
                         <span style={{ display: "inline-flex", alignItems: "center", padding: "0.25rem 0.5rem", borderRadius: "4px", backgroundColor: "var(--jq-warning-subtle)", color: "var(--jq-warning)", fontSize: "0.75rem", fontWeight: 500 }}>
                           Aguardando Assinatura
                         </span>
-                      ) : eq.statusLaudo === "assinado" ? (
+                      ) : eq.situacaoDocumental === "assinado" || eq.situacaoDocumental === "regular" ? (
                         <span style={{ display: "inline-flex", alignItems: "center", padding: "0.25rem 0.5rem", borderRadius: "4px", backgroundColor: "var(--jq-success-subtle)", color: "var(--jq-success)", fontSize: "0.75rem", fontWeight: 500 }}>
-                          Assinado
+                          Regular
                         </span>
                       ) : (
                         "—"
@@ -131,14 +210,14 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign
                             e.stopPropagation();
                             onCalibrate?.(eq);
                           }}
-                          aria-label={`Iniciar calibração ${eq.tag}`}
+                          aria-label={`Iniciar calibração ${eq.codigo}`}
                           title="Iniciar calibração / Gerar Laudo"
                         >
                           <Wrench size={16} />
                         </button>
                       ) : mode === "laudos" ? (
                         <>
-                          {eq.statusLaudo === "aguardando_assinatura" && onSign && (
+                          {eq.situacaoDocumental === "aguardando_assinatura" && onSign && (
                             <Button
                               variant="primary"
                               size="sm"
@@ -146,7 +225,7 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign
                                 e.stopPropagation();
                                 onSign(eq);
                               }}
-                              aria-label={`Assinar laudo ${eq.tag}`}
+                              aria-label={`Assinar laudo ${eq.codigo}`}
                               title="Assinar com GOV.BR"
                             >
                               Assinar
@@ -159,7 +238,7 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign
                               e.stopPropagation();
                               onDelete(eq);
                             }}
-                            aria-label={`Remover laudo ${eq.tag}`}
+                            aria-label={`Remover laudo ${eq.codigo}`}
                             title="Remover"
                           >
                             <Trash2 size={16} />
@@ -174,7 +253,7 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign
                               e.stopPropagation();
                               onEdit(eq);
                             }}
-                            aria-label={`Editar ${eq.tag}`}
+                            aria-label={`Editar ${eq.codigo}`}
                             title="Editar"
                           >
                             <Pencil size={16} />
@@ -186,7 +265,7 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign
                               e.stopPropagation();
                               onDelete(eq);
                             }}
-                            aria-label={`Excluir ${eq.tag}`}
+                            aria-label={`Excluir ${eq.codigo}`}
                             title="Excluir"
                           >
                             <Trash2 size={16} />
@@ -199,60 +278,7 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign
                 {isExpanded && (
                   <tr className={styles.expandedRow}>
                     <td colSpan={7}>
-                      <div className={styles.expandedContent}>
-                        <div className={styles.expandedHeader}>
-                          Detalhes do Equipamento: {eq.tag}
-                        </div>
-                        <div className={styles.expandedGrid}>
-                          <div 
-                            className={cn(styles.expandedItem, styles.clickableCard)}
-                            onClick={() => {
-                              const hasPadrao = !!eq.padrao && eq.padrao !== "Não definido";
-                              setPopup({
-                                isOpen: true,
-                                type: 'padrao',
-                                title: 'Padrão do Equipamento',
-                                content: hasPadrao ? `O equipamento possui padrão cadastrado: ${eq.padrao}` : 'Não há padrão cadastrado para este equipamento.',
-                                hasFile: hasPadrao
-                              });
-                            }}
-                          >
-                            <span className={styles.expandedLabel}>Padrão do Equipamento</span>
-                            <span className={styles.expandedValue}>{eq.padrao || "Não definido"}</span>
-                          </div>
-                          <div 
-                            className={cn(styles.expandedItem, styles.clickableCard)}
-                            onClick={() => {
-                              setPopup({
-                                isOpen: true,
-                                type: 'laudo',
-                                title: 'Laudo Assinado',
-                                content: eq.laudoAssinado ? 'O equipamento possui laudo assinado.' : 'Não há laudo assinado para este equipamento.',
-                                hasFile: eq.laudoAssinado
-                              });
-                            }}
-                          >
-                            <span className={styles.expandedLabel}>Laudo Assinado</span>
-                            <span className={styles.expandedValue} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                              {eq.laudoAssinado ? (
-                                <><CheckCircle2 size={16} color="var(--jq-success)" /> Sim</>
-                              ) : (
-                                <><XCircle size={16} color="var(--jq-danger)" /> Não</>
-                              )}
-                            </span>
-                          </div>
-                          <div className={styles.expandedItem}>
-                            <span className={styles.expandedLabel}>Tipo de Calibração</span>
-                            <span className={styles.expandedValue}>
-                              {eq.tipoCalibracao === "laboratorio" ? "Em Laboratório" : eq.tipoCalibracao === "campo" ? "Em Campo" : "Não definido"}
-                            </span>
-                          </div>
-                          <div className={styles.expandedItem}>
-                            <span className={styles.expandedLabel}>Data de Cadastro</span>
-                            <span className={styles.expandedValue}>{formatDate(eq.createdAt.split('T')[0])}</span>
-                          </div>
-                        </div>
-                      </div>
+                      <ExpandedEquipamentoDetails eq={eq} setPopup={setPopup} />
                     </td>
                   </tr>
                 )}
@@ -277,7 +303,7 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign
                 <div className={styles.fileContainer}>
                   <div className={styles.pdfPreviewContainer}>
                     <iframe 
-                      src="/exemplo.pdf#view=FitH" 
+                      src={popup.fileUrl ? `${popup.fileUrl}#view=FitH` : "/exemplo.pdf#view=FitH"} 
                       title={`Visualização de ${popup.type}`}
                       className={styles.pdfPreview}
                     />
@@ -285,15 +311,16 @@ export function EquipamentosTable({ items, onEdit, onDelete, onCalibrate, onSign
                   <div className={styles.fileActions}>
                     <div className={styles.fileDetails}>
                       <span className={styles.fileName}>arquivo_{popup.type}.pdf</span>
-                      <span className={styles.fileSize}>1.2 MB</span>
+                      <span className={styles.fileSize}></span>
                     </div>
                     <a 
-                      href="/exemplo.pdf" 
-                      download={`arquivo_${popup.type}.pdf`}
+                      href={popup.fileUrl || "/exemplo.pdf"} 
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className={styles.downloadBtn}
                       style={{ textDecoration: 'none', textAlign: 'center' }}
                     >
-                      Baixar Arquivo
+                      Abrir PDF
                     </a>
                   </div>
                 </div>

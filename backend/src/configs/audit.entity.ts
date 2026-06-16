@@ -1,4 +1,5 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/decorators/legacy";
+import { Entity, PrimaryKey, Property, ManyToOne } from "@mikro-orm/decorators/legacy";
+import { Usuario } from "./usuario.entity";
 
 @Entity({ tableName: "log_auditoria", schema: "dbo" })
 export class AuditLog {
@@ -7,6 +8,9 @@ export class AuditLog {
 
   @Property({ fieldName: "usuario_id", type: "int" })
   usuarioId!: number;
+
+  @ManyToOne(() => Usuario, { fieldName: "usuario_id", nullable: true, persist: false })
+  usuario?: Usuario;
 
   @Property({ type: "varchar", length: 50 })
   acao!: string;

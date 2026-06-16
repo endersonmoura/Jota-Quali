@@ -1,0 +1,39 @@
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jq-sp-4);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--jq-sp-4);
+}
+
+.selectField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jq-sp-1);
+}
+
+.selectLabel {
+  font-size: var(--jq-fs-sm);
+  font-weight: var(--jq-fw-medium);
+  color: var(--jq-text-strong);
+}
+
+.select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--jq-border);
+  border-radius: var(--jq-radius-md);
+  font-size: var(--jq-fs-sm);
+  color: var(--jq-text);
+  background-color: var(--jq-white);
+  outline: none;
+  transition: border-color var(--jq-dur-fast) var(--jq-ease);
+}
+
+.select:focus {
+  border-color: var(--jq-primary);
+  box-shadow: 0 0 0 1px var(--jq-primary);
+}

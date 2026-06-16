@@ -22,7 +22,7 @@ export function EquipamentosToolbar({
         <Search size={16} aria-hidden className={styles.searchIcon} />
         <input
           type="search"
-          placeholder="Buscar por tag, nome ou localização..."
+          placeholder="Buscar por código ou descrição..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           className={styles.search}

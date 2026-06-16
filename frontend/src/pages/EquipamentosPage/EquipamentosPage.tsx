@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Wrench } from "lucide-react";
+import { Plus, Wrench, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/PageHeader/PageHeader";
 import { EmptyState } from "@/components/feedback/EmptyState/EmptyState";
@@ -38,6 +38,7 @@ export default function EquipamentosPage() {
     create,
     update,
     remove,
+    isLoading,
   } = useEquipamentos();
 
   const [formOpen, setFormOpen] = useState(false);
@@ -61,10 +62,10 @@ export default function EquipamentosPage() {
   async function handleSubmit(input: EquipamentoInput) {
     try {
       if (editing) {
-        update(editing.id, input);
+        await update(editing.id, input);
         toast.success("Equipamento atualizado com sucesso.");
       } else {
-        create(input);
+        await create(input);
         toast.success("Equipamento cadastrado com sucesso.");
       }
       setFormOpen(false);
@@ -76,11 +77,11 @@ export default function EquipamentosPage() {
     }
   }
 
-  function handleConfirmDelete() {
+  async function handleConfirmDelete() {
     if (!toDelete) return;
     try {
-      remove(toDelete.id);
-      toast.success(`Equipamento ${toDelete.tag} removido.`);
+      await remove(toDelete.id);
+      toast.success(`Equipamento ${toDelete.codigo} inativado.`);
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : "Erro ao remover equipamento.";
@@ -103,7 +104,12 @@ export default function EquipamentosPage() {
         }
       />
 
-      {!hasAnyItems ? (
+      {isLoading ? (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "4rem", gap: "0.5rem" }}>
+          <Loader2 className="animate-spin" size={24} style={{ color: "var(--jq-primary)" }} />
+          <span style={{ color: "var(--jq-text-light)" }}>Carregando equipamentos...</span>
+        </div>
+      ) : !hasAnyItems ? (
         <EmptyState
           icon={Wrench}
           title="Nenhum equipamento cadastrado"
@@ -178,10 +184,10 @@ export default function EquipamentosPage() {
         title="Excluir equipamento"
         message={
           toDelete
-            ? `Tem certeza que deseja excluir o equipamento "${toDelete.tag} — ${toDelete.nome}"? Essa ação não poderá ser desfeita.`
+            ? `Tem certeza que deseja inativar o equipamento "${toDelete.codigo} — ${toDelete.descricao}"?`
             : ""
         }
-        confirmLabel="Excluir"
+        confirmLabel="Inativar"
         onConfirm={handleConfirmDelete}
         onClose={() => setToDelete(null)}
       />

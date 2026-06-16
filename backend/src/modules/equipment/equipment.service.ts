@@ -6,7 +6,7 @@ import { EquipmentDTO } from "./equipment.dto";
 export class EquipmentService {
   private repository = new EquipmentRepository();
 
-  async createEquipment(data: EquipmentDTO): Promise<void> {
+  async createEquipment(data: EquipmentDTO): Promise<Equipamento> {
     if (!data.descricao || !data.codigo || !data.tipo) {
       throw new AppError(
         "Descrição, Código e Tipo são obrigatórios.",
@@ -14,7 +14,7 @@ export class EquipmentService {
       );
     }
 
-    await this.repository.create({
+    const equipamento = this.repository.create({
       descricao: data.descricao.trim(),
       codigo: data.codigo.trim(),
       tipo: data.tipo,
@@ -33,6 +33,7 @@ export class EquipmentService {
 
     // Commit da transação (Unit of Work)
     await this.repository.flush();
+    return equipamento;
   }
 
   async getAllEquipments(): Promise<Equipamento[]> {
@@ -50,7 +51,7 @@ export class EquipmentService {
   async updateEquipment(
     id: number,
     data: Partial<EquipmentDTO>,
-  ): Promise<void> {
+  ): Promise<Equipamento> {
     if (!id)
       throw new AppError(
         "ID do equipamento é obrigatório para atualização.",
@@ -58,9 +59,17 @@ export class EquipmentService {
       );
 
     const equipment = await this.getEquipmentById(id);
-    await this.repository.update(equipment, data);
+    
+    const updateData: any = { ...data };
+    if (updateData.obraId !== undefined) {
+      updateData.obra = updateData.obraId;
+      delete updateData.obraId;
+    }
+
+    await this.repository.update(equipment, updateData);
 
     await this.repository.flush();
+    return equipment;
   }
 
   async deleteEquipment(id: number): Promise<void> {

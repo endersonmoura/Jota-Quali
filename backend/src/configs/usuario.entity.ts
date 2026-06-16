@@ -18,8 +18,8 @@ export class Usuario {
   @Property({ fieldName: "senha_hash", type: "varchar", length: 255 })
   senhaHash!: string;
 
-  @Property({ type: "varchar", length: 14, unique: true })
-  cpf!: string;
+  @Property({ type: "varchar", length: 14, unique: true, nullable: true })
+  cpf?: string;
 
   @Property({ type: "varchar", length: 20, default: "ativo" })
   status!: string;

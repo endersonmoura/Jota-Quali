@@ -48,4 +48,38 @@ export class UserController {
       next(error);
     }
   };
+
+  public updateRole = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      await this.service.updateRole(Number(req.params.id), req.body.role);
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: `Cargo atualizado para ${req.body.role}`,
+        });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updateProfile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      await this.service.updateProfile(Number(req.params.id), req.body);
+      res.status(200).json({
+        success: true,
+        message: "Perfil atualizado com sucesso.",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

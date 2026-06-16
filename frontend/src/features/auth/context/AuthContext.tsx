@@ -6,14 +6,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { authService } from "../services/authService";
+import { authService } from "@/services/auth/auth.service";
 import type {
   AuthSession,
-  AuthStatus,
   AuthUser,
   LoginCredentials,
   RegisterPayload,
-} from "../types";
+} from "@/services/auth/auth.types";
+import type { AuthStatus } from "../types";
 
 export interface AuthContextValue {
   user: AuthUser | null;
@@ -24,6 +24,7 @@ export interface AuthContextValue {
   logout: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<{ token: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
+  updateUser: (data: Partial<AuthUser>) => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(
@@ -59,9 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (payload: RegisterPayload) => {
     setStatus("loading");
     try {
-      const next = await authService.register(payload);
-      setSession(next);
-      setStatus("authenticated");
+      await authService.register(payload);
+      setStatus("unauthenticated");
     } catch (err) {
       setStatus("unauthenticated");
       throw err;
@@ -85,6 +85,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const updateUser = useCallback((data: Partial<AuthUser>) => {
+    setSession((prev) => {
+      if (!prev) return null;
+      const updatedSession = {
+        ...prev,
+        user: { ...prev.user, ...data },
+      };
+      
+      import("@/lib/storage").then(({ storage }) => {
+        storage.set("jq.session.v5", updatedSession);
+      });
+      
+      return updatedSession;
+    });
+  }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user: session?.user ?? null,
@@ -95,8 +111,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       requestPasswordReset,
       resetPassword,
+      updateUser,
     }),
-    [session, status, login, register, logout, requestPasswordReset, resetPassword]
+    [session, status, login, register, logout, requestPasswordReset, resetPassword, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

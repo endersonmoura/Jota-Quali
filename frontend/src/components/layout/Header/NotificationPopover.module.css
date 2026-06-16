@@ -1,0 +1,116 @@
+.popover {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--jq-sp-2);
+  width: 320px;
+  background: var(--jq-white);
+  border: 1px solid var(--jq-border);
+  border-radius: var(--jq-radius-md);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--jq-sp-3) var(--jq-sp-4);
+  border-bottom: 1px solid var(--jq-border);
+  background: var(--jq-surface-1);
+}
+
+.title {
+  font-size: var(--jq-fs-sm);
+  font-weight: var(--jq-fw-semibold);
+  color: var(--jq-text-strong);
+  margin: 0;
+}
+
+.markAllBtn {
+  background: transparent;
+  border: none;
+  font-size: var(--jq-fs-xs);
+  color: var(--jq-primary);
+  cursor: pointer;
+  padding: 0;
+}
+
+.markAllBtn:hover {
+  text-decoration: underline;
+}
+
+.list {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.empty {
+  padding: var(--jq-sp-6) var(--jq-sp-4);
+  text-align: center;
+  font-size: var(--jq-fs-sm);
+  color: var(--jq-text-muted);
+}
+
+.item {
+  display: flex;
+  gap: var(--jq-sp-3);
+  padding: var(--jq-sp-3) var(--jq-sp-4);
+  border-bottom: 1px solid var(--jq-border);
+  background: var(--jq-white);
+  cursor: pointer;
+  transition: background var(--jq-dur-fast) var(--jq-ease);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item:hover {
+  background: var(--jq-surface-2);
+}
+
+.itemUnread {
+  background: var(--jq-surface-3);
+}
+
+.itemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--jq-primary-soft);
+  color: var(--jq-primary);
+  flex-shrink: 0;
+}
+
+.itemContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemTitle {
+  font-size: var(--jq-fs-sm);
+  font-weight: var(--jq-fw-medium);
+  color: var(--jq-text-strong);
+}
+
+.itemMessage {
+  font-size: var(--jq-fs-xs);
+  color: var(--jq-text);
+  line-height: 1.4;
+}
+
+.itemTime {
+  font-size: var(--jq-fs-xs);
+  color: var(--jq-text-muted);
+  margin-top: var(--jq-sp-1);
+}

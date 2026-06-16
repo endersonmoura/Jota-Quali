@@ -37,5 +37,7 @@ export const registrarCalibracaoInternaSchema = z.object({
       .datetime()
       .transform((str) => new Date(str)),
     calibradorId: z.number().int().positive().optional(),
+    cpfResponsavel: z.string().length(11, "CPF deve ter 11 dígitos numéricos"),
+    tipoLocal: z.enum(["laboratorio", "campo"]),
   }),
 });

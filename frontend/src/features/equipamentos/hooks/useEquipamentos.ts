@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { equipamentosService } from "../services/equipamentosService";
 import type {
   Equipamento,
@@ -7,32 +8,30 @@ import type {
 } from "../types";
 
 export type StatusFilter = "todos" | StatusEquipamento;
-export type SortField = "tag" | "nome" | "ultimaCalibracao" | "localizacao" | "status" | null;
+export type SortField = "codigo" | "descricao" | "dataUltimaCalibracao" | "status" | null;
 export type SortDirection = "asc" | "desc";
 
 const PAGE_SIZE = 10;
 
 export function useEquipamentos(baseFilter?: (eq: Equipamento) => boolean) {
-  const [items, setItems] = useState<Equipamento[]>([]);
+  const queryClient = useQueryClient();
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    setItems(equipamentosService.list());
-  }, []);
-
-  useEffect(() => {
-    setPage(1);
-  }, [search, statusFilter]);
+  const { data: allItems = [], isLoading, isFetching } = useQuery({
+    queryKey: ["equipamentos"],
+    queryFn: () => equipamentosService.list(),
+  });
 
   const sorted = useMemo(() => {
-    const list = [...items];
+    const list = [...allItems];
     if (!sortField) {
       return list.sort((a, b) =>
-        a.tag.localeCompare(b.tag, undefined, { numeric: true, sensitivity: "base" })
+        a.codigo.localeCompare(b.codigo, undefined, { numeric: true, sensitivity: "base" })
       );
     }
 
@@ -50,7 +49,7 @@ export function useEquipamentos(baseFilter?: (eq: Equipamento) => boolean) {
 
       return sortDirection === "asc" ? comp : -comp;
     });
-  }, [items, sortField, sortDirection]);
+  }, [allItems, sortField, sortDirection]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -59,36 +58,63 @@ export function useEquipamentos(baseFilter?: (eq: Equipamento) => boolean) {
       if (statusFilter !== "todos" && eq.status !== statusFilter) return false;
       if (!term) return true;
       return (
-        eq.tag.toLowerCase().includes(term) ||
-        eq.nome.toLowerCase().includes(term) ||
-        eq.localizacao.toLowerCase().includes(term)
+        eq.codigo.toLowerCase().includes(term) ||
+        eq.descricao.toLowerCase().includes(term)
       );
     });
   }, [sorted, search, statusFilter, baseFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  // Quando mudamos a busca ou filtro, a página atual pode ficar inválida
   const currentPage = Math.min(page, totalPages);
+  
   const paginated = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, currentPage]);
 
-  const create = useCallback((input: EquipamentoInput) => {
-    const novo = equipamentosService.create(input);
-    setItems((prev) => [novo, ...prev]);
-    return novo;
-  }, []);
+  const createMutation = useMutation({
+    mutationFn: (input: EquipamentoInput) => equipamentosService.create(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["equipamentos"] });
+    },
+  });
 
-  const update = useCallback((id: string, input: EquipamentoInput) => {
-    const atualizado = equipamentosService.update(id, input);
-    setItems((prev) => prev.map((e) => (e.id === id ? atualizado : e)));
-    return atualizado;
-  }, []);
+  const updateMutation = useMutation({
+    mutationFn: ({ id, input }: { id: string | number; input: EquipamentoInput }) =>
+      equipamentosService.update(id, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["equipamentos"] });
+    },
+  });
 
-  const remove = useCallback((id: string) => {
-    equipamentosService.remove(id);
-    setItems((prev) => prev.filter((e) => e.id !== id));
-  }, []);
+  const inativarMutation = useMutation({
+    mutationFn: (id: string | number) => equipamentosService.inativar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["equipamentos"] });
+    },
+  });
+
+  const create = useCallback(
+    async (input: EquipamentoInput) => {
+      return createMutation.mutateAsync(input);
+    },
+    [createMutation]
+  );
+
+  const update = useCallback(
+    async (id: string | number, input: EquipamentoInput) => {
+      return updateMutation.mutateAsync({ id, input });
+    },
+    [updateMutation]
+  );
+
+  const remove = useCallback(
+    async (id: string | number) => {
+      return inativarMutation.mutateAsync(id);
+    },
+    [inativarMutation]
+  );
 
   const toggleSort = useCallback((field: SortField) => {
     if (sortField === field) {
@@ -104,14 +130,25 @@ export function useEquipamentos(baseFilter?: (eq: Equipamento) => boolean) {
     }
   }, [sortField, sortDirection]);
 
+  // Função auxiliar para resetar a paginação ao digitar (substituindo o antigo useEffect)
+  const handleSetSearch = useCallback((val: string) => {
+    setSearch(val);
+    setPage(1);
+  }, []);
+
+  const handleSetStatusFilter = useCallback((val: StatusFilter) => {
+    setStatusFilter(val);
+    setPage(1);
+  }, []);
+
   return {
-    items,
+    items: allItems,
     filtered,
     paginated,
     search,
-    setSearch,
+    setSearch: handleSetSearch,
     statusFilter,
-    setStatusFilter,
+    setStatusFilter: handleSetStatusFilter,
     sortField,
     setSortField,
     sortDirection,
@@ -125,5 +162,7 @@ export function useEquipamentos(baseFilter?: (eq: Equipamento) => boolean) {
     create,
     update,
     remove,
+    isLoading,
+    isFetching,
   };
 }

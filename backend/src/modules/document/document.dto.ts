@@ -11,4 +11,5 @@ export interface AssinarDocumentoDTO {
   documentoId: number;
   assinanteId: number;
   ipOrigem?: string;
+  pathArquivoAssinado: string;
 }

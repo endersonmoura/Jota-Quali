@@ -15,7 +15,7 @@ export const ensureAuthenticated = (
   }
 
   // DEBUG: Mostra no console o que o Bruno está enviando
-  console.log("[Auth Debug] Header recebido:", authHeader);
+
 
   const [, token] = authHeader.split(" ");
   const parts = (token || "").split(".");

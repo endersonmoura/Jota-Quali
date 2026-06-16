@@ -4,7 +4,7 @@ export interface AuthUser {
   email: string;
   role: "admin" | "consulta" | "calibrador" | "operacional" | "aguardando_aprovacao";
   avatarInitials: string;
-  gender?: "masculino" | "feminino";
+  cpf?: string;
 }
 
 export interface AuthSession {
@@ -29,7 +29,6 @@ export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
-  gender: "masculino" | "feminino";
 }
 
 export const ROLE_LABELS: Record<string, string> = {

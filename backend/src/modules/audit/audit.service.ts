@@ -26,12 +26,13 @@ export class AuditService {
 
     return logs.map((log) => ({
       id: log.id,
-      userId: log.usuarioId,
+      userId: log.usuario_id || log.usuarioId,
+      userName: log.usuarioNome || "Sistema",
       action: log.acao,
       resource: log.entidade,
-      resourceId: log.entidadeId,
+      resourceId: log.entidade_id || log.entidadeId,
       details: log.detalhes,
-      createdAt: log.dataHora,
+      createdAt: log.data_hora || log.dataHora,
     }));
   }
 }

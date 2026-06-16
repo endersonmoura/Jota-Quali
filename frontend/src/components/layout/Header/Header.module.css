@@ -67,6 +67,23 @@
   display: flex;
   align-items: center;
   gap: var(--jq-sp-2);
+  position: relative;
+}
+
+.bellWrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.notificationDot {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--jq-danger);
+  border: 1px solid var(--jq-white);
 }
 
 .userBtn {

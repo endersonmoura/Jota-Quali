@@ -13,6 +13,6 @@ export const uploadLaudoSchema = z.object({
 
 export const assinarDocumentoSchema = z.object({
   body: z.object({
-    documentoId: z.number({ required_error: "ID do documento é obrigatório" }),
+    documentoId: z.coerce.number({ required_error: "ID do documento é obrigatório" }),
   }),
 });

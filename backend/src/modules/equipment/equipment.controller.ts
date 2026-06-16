@@ -10,8 +10,8 @@ export class EquipmentController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      await this.service.createEquipment(req.body);
-      res.status(201).json({ message: "Equipamento cadastrado com sucesso." });
+      const novoEquipamento = await this.service.createEquipment(req.body);
+      res.status(201).json({ success: true, data: novoEquipamento, message: "Equipamento cadastrado com sucesso." });
     } catch (error) {
       next(error);
     }
@@ -24,7 +24,7 @@ export class EquipmentController {
   ): Promise<void> => {
     try {
       const equipments = await this.service.getAllEquipments();
-      res.status(200).json(equipments);
+      res.status(200).json({ success: true, data: equipments });
     } catch (error) {
       next(error);
     }
@@ -38,7 +38,7 @@ export class EquipmentController {
     try {
       const { id } = req.params;
       const equipment = await this.service.getEquipmentById(Number(id));
-      res.status(200).json(equipment);
+      res.status(200).json({ success: true, data: equipment });
     } catch (error) {
       next(error);
     }
@@ -51,8 +51,8 @@ export class EquipmentController {
   ): Promise<void> => {
     try {
       const { id } = req.params;
-      await this.service.updateEquipment(Number(id), req.body);
-      res.status(200).json({ message: "Equipamento atualizado com sucesso." });
+      const equipamento = await this.service.updateEquipment(Number(id), req.body);
+      res.status(200).json({ success: true, data: equipamento, message: "Equipamento atualizado com sucesso." });
     } catch (error) {
       next(error);
     }
@@ -66,7 +66,7 @@ export class EquipmentController {
     try {
       const { id } = req.params;
       await this.service.deleteEquipment(Number(id));
-      res.status(200).json({ message: "Equipamento inativado com sucesso." });
+      res.status(200).json({ success: true, message: "Equipamento inativado com sucesso." });
     } catch (error) {
       next(error);
     }

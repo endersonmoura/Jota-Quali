@@ -9,6 +9,7 @@ export interface CreateAuditDTO {
 export interface AuditResponseDTO {
   id: number;
   userId: number;
+  userName: string;
   action: string;
   resource: string;
   resourceId?: number;

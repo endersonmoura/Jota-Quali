@@ -74,6 +74,12 @@ export class CalibrationService {
       details: `Equipamento de ref: ${data.equipamentoReferenciaId}`,
     });
 
+    // Atualiza status do equipamento
+    await this.repository.updateEquipamentoAfterCalibration(
+      data.equipamentoId,
+      data.dataCalibracao
+    );
+
     return calibracaoId;
   }
 
@@ -91,5 +97,18 @@ export class CalibrationService {
       Data Calibração: ${data.dataCalibracao.toISOString()}
     `;
     return Buffer.from(conteudoFakePdf, "utf-8");
+  }
+
+  public async getUltimaCalibracao(equipamentoId: number) {
+    const calibracao = await this.repository.getUltimaCalibracao(equipamentoId);
+    if (!calibracao) return null;
+    return {
+      id: calibracao.id,
+      padraoReferencia: calibracao.padraoReferencia ? {
+        id: calibracao.padraoReferencia.id,
+        codigo: calibracao.padraoReferencia.codigo,
+        descricao: calibracao.padraoReferencia.descricao
+      } : null
+    };
   }
 }

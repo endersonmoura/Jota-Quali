@@ -1,4 +1,4 @@
-// TODO: Instalar e configurar @aws-sdk/client-s3 futuramente
+
 
 export const uploadImageToBucket = async (
   fileBuffer: Buffer,

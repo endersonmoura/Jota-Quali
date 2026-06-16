@@ -1,20 +1,19 @@
 export type StatusEquipamento = "ativo" | "vencido" | "inativo" | "vencendo" | "calibracao";
 
 export interface Equipamento {
-  id: string;
-  tag: string;
-  nome: string;
-  ultimaCalibracao: string | null; // ISO date (YYYY-MM-DD)
-  localizacao: string;
+  id: number;
+  codigo: string;
+  descricao: string;
+  tipo: string;
+  dataUltimaCalibracao?: string | null; // ISO date (YYYY-MM-DD)
+  dataVencimentoCalibracao?: string | null;
+  obraId?: number;
   status: StatusEquipamento;
-  padrao?: string;
-  laudoAssinado?: boolean;
-  tipoCalibracao?: "laboratorio" | "campo";
-  statusLaudo?: "aguardando_assinatura";
-  createdAt: string;
+  situacaoDocumental?: string;
+  criadoEm: string;
 }
 
-export type EquipamentoInput = Omit<Equipamento, "id" | "createdAt">;
+export type EquipamentoInput = Omit<Equipamento, "id" | "criadoEm">;
 
 export const STATUS_LABEL: Record<StatusEquipamento, string> = {
   ativo: "Ativo",

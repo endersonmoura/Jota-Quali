@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { api } from "@/services/api";
+import { authService } from "@/services/auth/auth.service";
 
 export const RegisterUser: React.FC = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    cpf: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -20,9 +21,9 @@ export const RegisterUser: React.FC = () => {
     setSuccess(false);
 
     try {
-      await api.post("/auth/register", formData);
+      await authService.register(formData);
       setSuccess(true);
-      setFormData({ name: "", email: "", password: "" });
+      setFormData({ name: "", email: "", password: "", cpf: "" });
     } catch (err: unknown) {
       const apiError = err as {
         response?: {
@@ -88,6 +89,19 @@ export const RegisterUser: React.FC = () => {
             value={formData.email}
             onChange={handleChange}
             required
+            style={{ width: "100%" }}
+          />
+        </div>
+        <div>
+          <label>CPF:</label>
+          <input
+            type="text"
+            name="cpf"
+            value={formData.cpf}
+            onChange={handleChange}
+            required
+            minLength={11}
+            maxLength={14}
             style={{ width: "100%" }}
           />
         </div>

@@ -15,12 +15,26 @@ export const ensureRole = (allowedRoles: string[]) => {
     }
 
     const repository = new UserRepository();
-    const user = await repository.findById(userId);
+    const user = await repository.findById(Number(userId));
 
-    if (!user || !user.perfil || !allowedRoles.includes(user.perfil.nomePerfil)) {
+
+
+    if (!user || !user.perfil) {
+      res.status(403).json({
+        success: false,
+        code: "FORBIDDEN_ROLE",
+        message: `Acesso negado: Perfil não encontrado.`,
+      });
+      return;
+    }
+
+    const nomePerfil = user.perfil.nomePerfil.trim().toLowerCase();
+    const rolesAllowed = allowedRoles.map((r) => r.trim().toLowerCase());
+
+    if (!rolesAllowed.includes(nomePerfil)) {
       return next(
         new AppError(
-          "Acesso negado: O seu perfil não possui permissão para esta ação.",
+          `Acesso negado: O seu perfil (${user.perfil.nomePerfil}) não possui permissão para esta ação.`,
           403,
           "FORBIDDEN_ROLE",
         ),

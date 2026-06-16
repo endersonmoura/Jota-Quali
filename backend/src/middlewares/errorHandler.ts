@@ -32,3 +32,7 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
     }
   });
 };
+
+export const notFound = (req: any, res: any, next: any) => {
+  res.status(404).json({ success: false, message: "Rota não encontrada" });
+};

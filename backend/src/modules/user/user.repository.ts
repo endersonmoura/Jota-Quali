@@ -7,7 +7,8 @@ import { CreateUserRecordDTO } from "./user.dto";
 
 export class UserRepository {
   private get em(): EntityManager {
-    return DI.em;
+    const { RequestContext } = require("@mikro-orm/core");
+    return (RequestContext.getEntityManager() as EntityManager) || DI.em.fork();
   }
 
   public async findByEmail(email: string): Promise<Usuario | null> {

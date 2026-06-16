@@ -18,6 +18,15 @@ export class DocumentRepository {
     return em.findOne(Documento, { id }, { populate: ["equipamento", "calibracao"] });
   }
 
+  public async findAll(): Promise<Documento[]> {
+    const em = this.em;
+    return em.find(
+      Documento,
+      {}, // Return all documents
+      { populate: ["equipamento", "equipamento.obra", "calibracao", "calibracao.equipamento", "calibracao.equipamento.obra"] }
+    );
+  }
+
   public async createLaudo(data: UploadLaudoDTO): Promise<number> {
     const em = this.em;
     const documento = em.create(Documento, {
@@ -59,6 +68,7 @@ export class DocumentRepository {
     // Atualiza status do documento
     const doc = await em.findOneOrFail(Documento, { id: data.documentoId });
     doc.statusAssinatura = true;
+    doc.pathArquivo = data.pathArquivoAssinado;
     doc.atualizadoEm = new Date();
     em.persist(doc);
     
@@ -83,6 +93,15 @@ export class DocumentRepository {
       solicitacao.status = "concluida";
       solicitacao.atualizadoEm = new Date();
       em.persist(solicitacao);
+      await em.flush();
+    }
+  }
+
+  public async deleteDocumento(id: number): Promise<void> {
+    const em = this.em;
+    const doc = await em.findOne(Documento, { id });
+    if (doc) {
+      em.remove(doc);
       await em.flush();
     }
   }

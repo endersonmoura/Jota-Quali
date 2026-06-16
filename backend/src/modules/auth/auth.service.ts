@@ -99,12 +99,23 @@ export class AuthService {
   }
 
   private toUserResponse(user: Usuario): UserResponseDTO {
+    const roleMap: Record<string, string> = {
+      "1": "admin",
+      "2": "consulta",
+      "3": "calibrador",
+      "4": "operacional",
+    };
+
+    const perfilId = user.perfil ? String(user.perfil.id || user.perfil) : "";
+    const roleString = roleMap[perfilId] || "aguardando_aprovacao";
+
     return {
       id: user.id,
       name: user.nome,
       email: user.email,
-      role: user.perfil ? String(user.perfil.id || user.perfil) : "N/A",
+      role: roleString,
       status: user.status,
+      cpf: user.cpf,
       createdAt: user.criadoEm,
     };
   }

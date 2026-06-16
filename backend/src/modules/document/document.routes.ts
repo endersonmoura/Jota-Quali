@@ -19,6 +19,20 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // limite de 5MB
 });
 
+// GET /api/documentos
+documentRoutes.get(
+  "/",
+  ensureAuthenticated,
+  controller.listarDocumentos,
+);
+
+// GET /api/documentos/:id
+documentRoutes.get(
+  "/:id",
+  ensureAuthenticated,
+  controller.getDocumentoById,
+);
+
 // POST /api/documentos/upload-laudo
 documentRoutes.post(
   "/upload-laudo",
@@ -33,8 +47,17 @@ documentRoutes.post(
   "/assinar",
   ensureAuthenticated,
   ensureRole(["administrador"]), // RN08: Somente admin pode assinar
+  upload.single("arquivo_assinado"), // adicionado o multer
   validateRequest(assinarDocumentoSchema),
   controller.assinarDocumento,
+);
+
+// DELETE /api/documentos/:id
+documentRoutes.delete(
+  "/:id",
+  ensureAuthenticated,
+  ensureRole(["administrador"]), // Somente admin pode excluir
+  controller.excluirDocumento,
 );
 
 export default documentRoutes;
